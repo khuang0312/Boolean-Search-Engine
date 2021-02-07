@@ -1,0 +1,9 @@
+Completed inverted index
+{token : [posting]}
+
+Report
+a table with assorted numbers pertaining to index
+containing at least 
+-number of documents
+-number of unique tokens
+-total size of index on disk
