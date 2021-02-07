@@ -19,14 +19,24 @@ class InvertedIndex:
         return log10()
         
 if __name__ == "__main__":
-    # create an array of documents... and an counter of documents
-        # as we create the documents, add their terms to a map of terms to frequencies...
-            # for i in documetns.terms_frequencies:
-                # global_frequencies[i] += 1...
+    # Create an array of documents and an counter of documents
+    # We need the amount of documents to calculate idf later.
+    # It also avoids us having to use len on the array of documents.
 
-    # create an mapping of tokens to postings
-        # for d in documents:
-        #  tp{token}.append(Posting(d.name, tf_idf score))
-            
-
+    # As you create a document, add the terms to a dictionary mapping 
+    # terms among all the documents to the amount of documents containing that term
+    
+    # for example
+    # for i in documents.terms_frequencies:
+        # global_frequencies[i] += 1
+    
     # calculate the idf by getting the total number of documents containing each term
+    
+    # Create a dictionary mapping tokens to postings by iterating through
+    # the array of documents...
+
+    # for example
+    # for d in documents:
+    #   #calculate tf_idf_score at this point...
+    #   token_to_posting[token].append(Posting(d.name, tf_idf_score))
+
