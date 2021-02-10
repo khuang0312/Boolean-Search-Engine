@@ -1,4 +1,4 @@
-from math import log10, log
+from math import log10
 
 
 # The inverted index creates a mapping between tokens and postings
@@ -39,4 +39,5 @@ if __name__ == "__main__":
     # for d in documents:
     #   #calculate tf_idf_score at this point...
     #   token_to_posting[token].append(Posting(d.name, tf_idf_score))
-
+    
+    # save it to a file probably

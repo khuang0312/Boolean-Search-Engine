@@ -1,4 +1,4 @@
-Completed inverted index
+Complete inverted index
 {token : [posting]}
 
 Report

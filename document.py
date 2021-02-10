@@ -1,4 +1,4 @@
-from math import log10, log
+from math import log10
 
 # This defines a Document class
 # A Document represents a processed website

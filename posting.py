@@ -6,4 +6,3 @@ class Posting:
 
     def __eq__(self, other):
         pass
-
