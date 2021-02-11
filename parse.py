@@ -21,7 +21,8 @@ def page_text(filepath : str) -> str:
     return page_text
 
 def get_words(text : str) -> (int, {str : int}):
-    '''
+    '''Uses very simplified rules to get words from the file
+        Only lowercase sequences of 3+ alphabetic characters
     '''
     words_found = 0
     word_frequencies = {}
@@ -36,6 +37,20 @@ def get_words(text : str) -> (int, {str : int}):
  
     return words_found, word_frequencies
 
+def write_json(name : str, initial_obj):
+    '''Creates or overwites a json file of a specified name with a
+        specific json-serializable object...
+    '''
+    with open(name, 'w') as json_file:
+        json.dump(initial_obj, json_file)
+
+def load_json(name : str) -> dict:
+    '''Gets a JSON object from a file
+    '''
+    mapping = {}
+    with open(name, "r") as json_file:
+        mapping = json.load(json_file)
+    return mapping
 
 if __name__ == "__main__":
     print(get_words(page_text("DEV/aiclub_ics_uci_edu/8ef6d99d9f9264fc84514cdd2e680d35843785310331e1db4bbd06dd2b8eda9b.json")))
