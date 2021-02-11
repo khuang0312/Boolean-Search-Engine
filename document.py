@@ -1,4 +1,5 @@
 from math import log10
+from parse import page_text, get_words
 
 # This defines a Document class
 # A Document represents a processed website
@@ -13,13 +14,13 @@ class Document:
         
         # this maps tokens (terms) to amount of occurences in the doc...
         self.term_frequencies = {}
-
-        with open(path) as f:
-            # do some parsing stuff here...
-            # fil this in
+        
+        # parse the file at the path passed in
+        self.terms, self.term_frequencies = get_words(page_text(path))
+       
 
     def __str__(self):
-        return "Document({})".format(self.name)
+        return "Document({})".format(self.path)
     
     # Numerous ways of calculating the term frequency is provided down here
     # This gives us a variety of options

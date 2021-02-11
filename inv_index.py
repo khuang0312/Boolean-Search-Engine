@@ -1,13 +1,34 @@
 from math import log10
 
+from os import walk
+from document import Document
+
+def _create_doc_arr(folder):
+    '''returns list of Document objects, count of Documents, and
+        a set of global tokens
+        
+       this is a private helper method used to construct an
+       InvertedIndex
+    '''
+    documents = []
+    documents_len = 0
+    
+    # goes through files...
+    for domain, dir, pages in walk(folder):
+        for p in pages:
+            path = domain + "/" + p
+            doc = Document(path)
+            print(doc.term_frequencies)
+            documents.append(doc)
 
 # The inverted index creates a mapping between tokens and postings
 class InvertedIndex:
-    def __self__(self):
-        # parse the files...
-        # create postings...
-        pass
+    def __init__(self, folder : str):
+        _create_doc_arr(folder);
 
+
+
+                          
     def unary_idf(self, term):
         return 1
 
@@ -41,3 +62,7 @@ if __name__ == "__main__":
     #   token_to_posting[token].append(Posting(d.name, tf_idf_score))
     
     # save it to a file probably
+
+
+    # this contains the main routine for the program
+    InvertedIndex("DEV/")
