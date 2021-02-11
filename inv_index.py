@@ -48,7 +48,8 @@ class InvertedIndex:
             for page in pages:
                 self.total_docs += 1
                 path = domain + "/" + page
-                print(self.total_docs, path) # DEBUG
+                # print(self.total_docs, path) # DEBUG
+                print(self.total_docs)
                 term_count, term_frequencies = parse.get_words(parse.page_text(path))
                 
                 # process document
@@ -62,7 +63,7 @@ class InvertedIndex:
                 # take tokens from document
                 # serialize token into tokens dict
                 if self.unique_words % 10000 == 0:
-                    
+                    pass    
 
                 tokens_dict = parse.load_json(INDEX_JSON)
                 for term in term_frequencies:
