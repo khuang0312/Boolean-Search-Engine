@@ -19,20 +19,41 @@ import json
 }
 '''
 
+'''
+Documents.json
+{
+ id (int) : url (path)  
+ 
+}
+
+
+{
+    // tokens -> {}
+
+    'token1' : [{doc_id : int, tf_idf : int}]
+}
+'''
 
 DOCUMENTS_FOLDER = "DEV/"
 DOCUMENTS_JSON = "documents"
 INDEX_JSON = "index"
 REPORT_JSON = "report"
-
+BATCH_SIZE = 300000
+MAX_DOCS = 55393
 
 # The inverted index creates a mapping between tokens and postings
 class InvertedIndex:
     def __init__(self, folder : str):
         '''Sets up files to serialize into as well as variables for analytics...
         '''
-        parse.write_json(DOCUMENTS_JSON, {})
-        parse.write_json(INDEX_JSON, {})
+        
+        # batch
+        self.batch = 0 # this indicates which files to read from... starts at 0
+        self.index = {}
+        self.documents = [] 
+
+        parse.write_json(DOCUMENTS_JSON+str(self.batch), [])
+        parse.write_json(INDEX_JSON+str(self.batch), {})
         parse.write_json(REPORT_JSON, {})
         
         # folder
@@ -45,19 +66,79 @@ class InvertedIndex:
 
     def process_files(self) -> None:
         for domain, dir, pages in walk(self.folder):
+            
             for page in pages:
                 self.total_docs += 1
+                print("Docs Parsed:", self.total_docs, "Words found:", self.unique_words)
                 path = domain + "/" + page
-                # print(self.total_docs, path) # DEBUG
-                print(self.total_docs)
+                
+                self.documents.append(path)
                 term_count, term_frequencies = parse.get_words(parse.page_text(path))
                 
+                terms_in_prev_index = set()
+
+                for i in range(self.batch+1):
+                    prev_index = parse.load_json(INDEX_JSON+str(i))
+                    for term in term_frequencies:
+                        if term in prev_index:
+                            prev_index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
+                            terms_in_prev_index.add(term)
+                            continue
+                    parse.write_json(INDEX_JSON+str(i),  prev_index)
+
+                for term in [k for k in term_frequencies.keys() if k not in terms_in_prev_index]:
+                    if term not in self.index:
+                        self.index[term] = []
+                        self.unique_words += 1
+                    self.index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
+                '''
+                for term in term_frequencies:
+                    # check to see if token exists in previous index files
+                    for i in range(self.batch+1): # self.batch + 1 reflects actual amount of batches
+                        prev_index = parse.load_json(INDEX_JSON+str(i));
+                        if term in prev_index:
+                            
+                            prev_index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
+                            parse.write_json(INDEX_JSON+str(i),  prev_index)
+                            break;
+                    else: # if it doesn't...
+                        if term not in self.index:
+                            self.index[term] = []
+                            self.unique_words += 1
+                        self.index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
+                '''
+                if (len(self.index) >= BATCH_SIZE or (len(self.index) < BATCH_SIZE and self.total_docs == MAX_DOCS)):
+                    print("Batch {}".format(self.batch))
+                    parse.write_json(INDEX_JSON+str(self.batch), self.index)
+                    parse.write_json(DOCUMENTS_JSON+str(self.batch), self.documents)
+                    self.index = {}
+                    self.documents = []
+                    self.batch += 1
+                    parse.write_json(DOCUMENTS_JSON+str(self.batch), []) # make new files
+                    parse.write_json(INDEX_JSON+str(self.batch), {})
+                
+                
+                
+                
+                
+                
+                
+                
+                '''
+                New attempt
+                print(self.total_docs)
+                
+                
+                
+                '''
+
+                '''
                 # process document
                 # create document object
                 # serialize into documents dict
                 documents_dict = parse.load_json(DOCUMENTS_JSON)
                 # reference document.py to understand what's going on here
-                documents_dict[path] = {"file_name" : page, "term_count" : term_count, "term_frequencies" : term_frequencies}
+                documents_dict[id_num] = {"file_name" : page, "term_count" : term_count, "term_frequencies" : term_frequencies}
                 parse.write_json(DOCUMENTS_JSON, documents_dict)
                 
                 # take tokens from document
@@ -72,7 +153,8 @@ class InvertedIndex:
                         tokens_dict[term] = {}
                     tokens_dict[term][path] = {"raw_freq" : raw_freq(term_frequencies, term)} 
                 parse.write_json(INDEX_JSON, tokens_dict)
-        
+                '''
+                
     def calculate_tf_idf(self): 
         tokens_dict = parse.load_json(INDEX_JSON)
 
@@ -85,6 +167,9 @@ class InvertedIndex:
                 tokens_dict[token][path]["tf-idf"] = tdf * idf
 
         parse.write_json(INDEX_JSON, tokens_dict)
+
+    def create_analytics(self):
+        parse.write_json(REPORT_JSON, {"total_docs": self.total_docs, "unique_words": self.unique_words})
                           
     def unary_idf(self, term):
         return 1
@@ -106,4 +191,5 @@ class InvertedIndex:
 if __name__ == "__main__":
     inverted_index = InvertedIndex(DOCUMENTS_FOLDER)
     inverted_index.process_files()
-    inverted_index.calculate_tf_idf()
+    #inverted_index.calculate_tf_idf()
+    inverted_index.create_analytics()

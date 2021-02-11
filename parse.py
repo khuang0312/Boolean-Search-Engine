@@ -56,7 +56,7 @@ def load_json(name : str) -> dict:
     '''
     mapping = {}
     with open(name + ".json", "r") as json_file:
-        mapping = json.load(json_file)
+        mapping = json.load(json_file, object_hook=lambda d : {int(k) if k.isdigit() else k: d[k] for k in d})
     return mapping
 
 if __name__ == "__main__":
