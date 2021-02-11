@@ -15,13 +15,11 @@ class Document:
         self.term_frequencies = {}
 
         with open(path) as f:
-            pass
             # do some parsing stuff here...
             # fil this in
 
     def __str__(self):
-        # return "Document({})".format(self.name) # self.name?
-        return "Document({})".format(self.path)
+        return "Document({})".format(self.name)
     
     # Numerous ways of calculating the term frequency is provided down here
     # This gives us a variety of options
@@ -29,24 +27,24 @@ class Document:
     def bool_freq(self, term: str) -> int:
         '''Returns 1 if term occurs in document and 0 otherwise
         '''
-        return 1 if term in self.term_frequencies else 0
+        return 1 if term in term_frequencies else 0
     
     def raw_freq(self, term : str) -> int:
         '''raw_freq returns the raw count of a term in a document...
         '''
-        if term not in self.term_frequencies:
+        if term not in term_frequencies:
             return 0
         else:
-            return self.term_frequencies[term]
+            return term_frequencies[term]
     
     def adj_freq(self, term : str) -> int:
         '''returns raw_freq divide by number of words in d to adjust
         for document length
         '''
-        if term not in self.term_frequencies:
+        if term not in term_frequencies:
             return 0
         else:
-            return self.term_frequencies[term] / self.terms
+            return term_frequencies[term] / self.terms
 
     def log_freq(self, term : str) -> int:
         '''return log(1+raw_frequencies)
@@ -59,11 +57,10 @@ class Document:
         returns the raw_frequency of the word over raw frequency 
         of most occuring term in document
         '''
-        freq_ratio = self.raw_freq(term) / max(self.term_frequencies.values())
+        freq_ratio = raw_freq(term) / max(self.term_frequencies.values())
         return 0.5 + (0.5 * freq_ratio)
     
     def __eq__(self, other) -> bool:
         '''Two postings are identical if they have the same name
         '''
-        # return self.file.name == other.file.name
-        pass
+        return self.file.name == other.file.name
