@@ -19,6 +19,7 @@ class InvertedIndex:
         return log10()
         
 if __name__ == "__main__":
+    pass
     # Create an array of documents and an counter of documents
     # We need the amount of documents to calculate idf later.
     # It also avoids us having to use len on the array of documents.

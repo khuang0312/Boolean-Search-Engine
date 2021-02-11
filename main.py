@@ -8,17 +8,23 @@ from document import Document
 
 
 if __name__ == "__main__":
-   main_folder = "DEV/" # folder of webpages 
+    main_folder = "DEV/" # folder of webpages 
    
 
-   documents = []
+    documents = []
 
-   # goes through files...
-   for domain, dir, pages in walk(main_folder):
-       for p in pages:
-           path = domain + "/" + p
-           doc = Document(path)
-           documents.append(doc)
+    # goes through files...
+    for domain, dir, pages in walk(main_folder):
+        # domain: DEV/{domain}
+        # dir: []
+        # pages: ['{}.json']
+        for p in pages:
+            path = domain + "/" + p
+            # path: DEV/{domain}/{}.json
+            doc = Document(path)
+            documents.append(doc)
+
+    
                               
 
    
