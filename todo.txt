@@ -1,5 +1,8 @@
-Complete inverted index
-{token : [posting]}
+Factor in headers (h1, h2, h3) and boldness (b, strong) for importance
+Stemming
+Split index among different files...
+
+
 
 Report
 a table with assorted numbers pertaining to index

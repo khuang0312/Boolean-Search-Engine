@@ -10,6 +10,8 @@ def page_text(filepath : str) -> str:
 
        Warning: the string is not printable because of Unicode characters
        within it...
+
+       We need to also consider bolding (b, strong) and headings (h1, h2, h3)
     '''
     page_text = ""
 
@@ -22,12 +24,17 @@ def page_text(filepath : str) -> str:
 
 def get_words(text : str) -> (int, {str : int}):
     '''Uses very simplified rules to get words from the file
-        Only lowercase sequences of 3+ alphabetic characters
+        Only lowercase alphanumeric characters
+
+        According to general specifications, we use
+        all alphanumeric sequences
+
+        We consider stop words...
     '''
     words_found = 0
     word_frequencies = {}
-
-    for word in re.finditer(r'([a-zA-Z0-9]{3,})', text):
+    
+    for word in re.finditer(r'([a-zA-Z0-9]+)', text):
         word = word.group(0).lower()
         if word not in word_frequencies:
             words_found += 1
@@ -41,14 +48,14 @@ def write_json(name : str, initial_obj):
     '''Creates or overwites a json file of a specified name with a
         specific json-serializable object...
     '''
-    with open(name, 'w') as json_file:
+    with open(name + ".json", 'w') as json_file:
         json.dump(initial_obj, json_file)
 
 def load_json(name : str) -> dict:
     '''Gets a JSON object from a file
     '''
     mapping = {}
-    with open(name, "r") as json_file:
+    with open(name + ".json", "r") as json_file:
         mapping = json.load(json_file)
     return mapping
 

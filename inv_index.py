@@ -21,9 +21,9 @@ import json
 
 
 DOCUMENTS_FOLDER = "DEV/"
-DOCUMENTS_JSON = "documents.json"
-INDEX_JSON = "index.json"
-REPORT_JSON = "report.json"
+DOCUMENTS_JSON = "documents"
+INDEX_JSON = "index"
+REPORT_JSON = "report"
 
 
 # The inverted index creates a mapping between tokens and postings
@@ -61,6 +61,9 @@ class InvertedIndex:
                 
                 # take tokens from document
                 # serialize token into tokens dict
+                if self.unique_words % 10000 == 0:
+                    
+
                 tokens_dict = parse.load_json(INDEX_JSON)
                 for term in term_frequencies:
                     if term not in tokens_dict:
