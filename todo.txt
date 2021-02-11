@@ -1,7 +1,7 @@
 Factor in headers (h1, h2, h3) and boldness (b, strong) for importance
 Stemming
 Split index among different files...
-
+Use NLTK to tokenize
 
 
 Report
