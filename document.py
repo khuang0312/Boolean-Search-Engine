@@ -4,15 +4,16 @@ from math import log10
 # A Document represents a processed website
 
 class Document:
-    def __init__(self, path):
-        self.path = path # the path the file was found at
-
+    def __self__(self, name):
+        self.name = name # the document file the token was found in
+        
         # keep track of amount of unique tokens (terms)
         # this avoids using len(self.term_frequencies)
         self.terms = 0
         
         # this maps tokens (terms) to amount of occurences in the doc...
         self.term_frequencies = {}
+<<<<<<< HEAD
 
         with open(path) as f:
             pass
@@ -22,6 +23,8 @@ class Document:
     def __str__(self):
         # return "Document({})".format(self.name) # self.name?
         return "Document({})".format(self.path)
+=======
+>>>>>>> parent of 2d6f997... created an loop that should get us an global array of documents to work with
     
     # Numerous ways of calculating the term frequency is provided down here
     # This gives us a variety of options
@@ -62,8 +65,12 @@ class Document:
         freq_ratio = self.raw_freq(term) / max(self.term_frequencies.values())
         return 0.5 + (0.5 * freq_ratio)
     
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other : Document) -> bool:
         '''Two postings are identical if they have the same name
         '''
+<<<<<<< HEAD
         # return self.file.name == other.file.name
         pass
+=======
+        return self.name == other.name
+>>>>>>> parent of 2d6f997... created an loop that should get us an global array of documents to work with
