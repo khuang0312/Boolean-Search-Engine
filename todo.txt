@@ -1,7 +1,10 @@
 Factor in headers (h1, h2, h3) and boldness (b, strong) for importance
+<<<<<<< HEAD
+=======
 Stemming
 Split index among different files... #DONE
 Use NLTK to tokenize
+>>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
 
 
 Report

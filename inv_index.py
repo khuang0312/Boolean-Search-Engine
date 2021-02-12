@@ -285,5 +285,9 @@ class InvertedIndex:
         
 if __name__ == "__main__":
     inverted_index = InvertedIndex(DOCUMENTS_FOLDER)
+<<<<<<< HEAD
+    inverted_index.process_files()
+=======
     #inverted_index.process_files()
+>>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
     inverted_index.create_analytics()
