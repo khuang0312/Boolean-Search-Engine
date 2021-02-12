@@ -44,6 +44,7 @@ def get_words(text : str) -> (int, {str : int}):
  
     return words_found, word_frequencies
 
+
 def write_json(name : str, initial_obj):
     '''Creates or overwites a json file of a specified name with a
         specific json-serializable object...
@@ -56,8 +57,48 @@ def load_json(name : str) -> dict:
     '''
     mapping = {}
     with open(name + ".json", "r") as json_file:
-        mapping = json.load(json_file, object_hook=lambda d : {int(k) if k.isdigit() else k: d[k] for k in d})
+        mapping = json.load(json_file)
     return mapping
+
+def append_json(name : str, initial_obj):
+    '''Creates or appends to a json file of a specified name with a
+        specific json-serializable object...
+    '''
+    with open(name + ".json", 'a') as json_file:
+        json.dump(initial_obj, json_file)
+
+def merge_index(name1: str, name2: str) -> {str : [{str : int, str: int}]}:
+    '''Takes the keys in name2 that are also in key one and adds the values
+        to the corresponding keys in key2
+
+        For example {"apple" : [{'a' : 2}]}, {"apple" : [{'b' : 2}]}
+        {"apple" : [{'a': 2}, {'b' : 2}]}i
+    '''
+    index1 = load_json(name1)
+    index2 = load_json(name2)
+    
+    keys_to_purge = set()
+
+    for token in index2.copy():
+        if token in index1:
+            index1[token] += index2[token]
+            keys_to_purge.add(token)
+
+    for key in keys_to_purge:
+        del index2[key]
+
+    write_json(name1, index1)
+    write_json(name2, index2)
+
+def merge_indices(root_name: str, batches : int):
+    '''
+    '''
+    pass
+    # for i in range(batches - 1):
+    #    for j in range(i + 1, batches):
+    #        merge_index(root_nane + str(i), )
+
+
 
 if __name__ == "__main__":
     print(get_words(page_text("DEV/aiclub_ics_uci_edu/8ef6d99d9f9264fc84514cdd2e680d35843785310331e1db4bbd06dd2b8eda9b.json")))

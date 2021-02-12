@@ -9,25 +9,6 @@ import json
 # A diagram of index.json
 '''
 {
-    // tokens -> "posting dicts"
-    // postings are the filepath to a dict of attributes important to postings
-    // tdf-idf scores for instance...
-    // "postings" might have important attributes 
-    // keeping postings in a dict improves access speed of specific postings
-
-    'token1' : {'path1' : {'tdf-idf' : int}, 'path2' : {...}},
-}
-'''
-
-'''
-Documents.json
-{
- id (int) : url (path)  
- 
-}
-
-
-{
     // tokens -> {}
 
     'token1' : [{doc_id : int, tf_idf : int}]
@@ -72,11 +53,35 @@ class InvertedIndex:
                 print("Docs Parsed:", self.total_docs, "Words found:", self.unique_words)
                 path = domain + "/" + page
                 
+                
+
+                if (len(self.index) >= BATCH_SIZE or (len(self.index) < BATCH_SIZE and self.total_docs == MAX_DOCS)):
+                    print("Batch {}".format(self.batch))
+                    parse.write_json(INDEX_JSON+str(self.batch), self.index)
+                    parse.write_json(DOCUMENTS_JSON+str(self.batch), self.documents)
+                    self.index = {}
+                    self.documents = []
+                    self.batch += 1
+                    parse.write_json(DOCUMENTS_JSON+str(self.batch), []) # make new files
+                    parse.write_json(INDEX_JSON+str(self.batch), {})
+
+                
                 self.documents.append(path)
                 term_count, term_frequencies = parse.get_words(parse.page_text(path))
                 
+                for term in term_frequencies:
+                    if term not in self.index:
+                        self.index[term] = []
+                        self.unique_words += 1
+                    self.index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
+                
+                
+                
+                '''
                 terms_in_prev_index = set()
+                
 
+                
                 for i in range(self.batch+1):
                     prev_index = parse.load_json(INDEX_JSON+str(i))
                     for term in term_frequencies:
@@ -91,6 +96,8 @@ class InvertedIndex:
                         self.index[term] = []
                         self.unique_words += 1
                     self.index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
+                '''
+
                 '''
                 for term in term_frequencies:
                     # check to see if token exists in previous index files
@@ -107,15 +114,6 @@ class InvertedIndex:
                             self.unique_words += 1
                         self.index[term].append({"doc_id" : self.total_docs, "tf_idf" : term_frequencies[term]})
                 '''
-                if (len(self.index) >= BATCH_SIZE or (len(self.index) < BATCH_SIZE and self.total_docs == MAX_DOCS)):
-                    print("Batch {}".format(self.batch))
-                    parse.write_json(INDEX_JSON+str(self.batch), self.index)
-                    parse.write_json(DOCUMENTS_JSON+str(self.batch), self.documents)
-                    self.index = {}
-                    self.documents = []
-                    self.batch += 1
-                    parse.write_json(DOCUMENTS_JSON+str(self.batch), []) # make new files
-                    parse.write_json(INDEX_JSON+str(self.batch), {})
                 
                 
                 
@@ -169,8 +167,63 @@ class InvertedIndex:
         parse.write_json(INDEX_JSON, tokens_dict)
 
     def create_analytics(self):
-        parse.write_json(REPORT_JSON, {"total_docs": self.total_docs, "unique_words": self.unique_words})
-                          
+        print("Report")
+        # parse.write_json(REPORT_JSON, {"total_docs": self.total_docs, "unique_words": self.unique_words})
+        GROUPS = ["numbers", "a_to_o", "p_to_z"]
+        report_batch = [0, 0, 0]
+        MAX_GROUP_SIZE = 150000
+        
+        inGROUP1 = lambda x: ord(x[0]) >= ord('a') and ord(x[0]) <= ord('o')
+        inGROUP2 = lambda x: ord(x[0]) >= ord('p') and ord(x[0]) <= ord('z')
+        
+        unique_words = 0
+        
+        token_groups = {GROUPS[0] : {}, GROUPS[1] : {}, GROUPS[2]: {}}    
+
+        for i in range(6): #self.batch
+            print("Batch", i)
+            tokens_batch = parse.load_json(INDEX_JSON+str(i))
+            
+            for token in tokens_batch:
+                token_group = GROUPS[0]
+                
+                if inGROUP1(token):
+                    token_group = GROUPS[1]
+                elif inGROUP2(token):
+                    token_group = GROUPS[2]
+                
+                dct = token_groups[token_group]
+
+                if token not in dct:
+                    dct[token] = []
+                    # self.unique_words += 1
+                    unique_words += 1
+                    print(unique_words)
+                dct[token] += tokens_batch[token]
+                
+                if len(dct) > MAX_GROUP_SIZE or i == 5:
+                    group_num = GROUPS.index(token_group)
+                    
+                    if (report_batch[group_num] - 1 >= 0):
+                        print("loading previous {} {}".format(token_group, report_batch[group_num] - 1))
+                        prev_dct = parse.load_json(token_group+str(report_batch[group_num] - 1))
+                        for k in prev_dct:
+                            if k not in dct:
+                                dct[k] = []
+                            dct[k] += prev_dct[k]
+                    
+                    print("writing {} {}".format(token_group, report_batch[group_num]))
+                    parse.write_json(token_group+str(report_batch[group_num]), dct)
+                    token_groups[token_group] = {}
+                    print({k : len(token_groups[k]) for k in token_groups})
+                    report_batch[group_num] += 1
+            
+        for i in range(len(GROUPS)):
+            print(len(parse.load_json(GROUPS[0])) )
+            print(len(parse.load_json(GROUPS[1])) )
+            print(len(parse.load_json(GROUPS[2])) )
+        print("Unique words:", unique_words)  
+        
     def unary_idf(self, term):
         return 1
 
@@ -190,6 +243,5 @@ class InvertedIndex:
         
 if __name__ == "__main__":
     inverted_index = InvertedIndex(DOCUMENTS_FOLDER)
-    inverted_index.process_files()
-    #inverted_index.calculate_tf_idf()
+    #inverted_index.process_files()
     inverted_index.create_analytics()
