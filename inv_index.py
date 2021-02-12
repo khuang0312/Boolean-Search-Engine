@@ -30,12 +30,12 @@ class InvertedIndex:
         
         # batch
         self.batch = 0 # this indicates which files to read from... starts at 0
-        self.index = {}
-        self.documents = [] 
+        self.index = dict()
+        self.documents = list()
 
-        parse.write_json(DOCUMENTS_JSON+str(self.batch), [])
-        parse.write_json(INDEX_JSON+str(self.batch), {})
-        parse.write_json(REPORT_JSON, {})
+        #parse.write_json(DOCUMENTS_JSON+str(self.batch), [])
+        #parse.write_json(INDEX_JSON+str(self.batch), {})
+        #parse.write_json(REPORT_JSON, {})
         
         # folder
         self.folder = folder
@@ -59,11 +59,11 @@ class InvertedIndex:
                     print("Batch {}".format(self.batch))
                     parse.write_json(INDEX_JSON+str(self.batch), self.index)
                     parse.write_json(DOCUMENTS_JSON+str(self.batch), self.documents)
-                    self.index = {}
-                    self.documents = []
+                    self.index = dict()
+                    self.documents = list()
                     self.batch += 1
-                    parse.write_json(DOCUMENTS_JSON+str(self.batch), []) # make new files
-                    parse.write_json(INDEX_JSON+str(self.batch), {})
+                    #parse.write_json(DOCUMENTS_JSON+str(self.batch), []) # make new files
+                    #parse.write_json(INDEX_JSON+str(self.batch), {})
 
                 
                 self.documents.append(path)
@@ -166,20 +166,61 @@ class InvertedIndex:
 
         parse.write_json(INDEX_JSON, tokens_dict)
 
+
+    '''
+    {
+        // tokens -> {}
+
+        'token1' : [{doc_id : int, tf_idf : int}]
+    }
+    '''
     def create_analytics(self):
+        def getTokenGroup(token):
+            if (ord(token[0]) >= ord('a') and ord(token[0]) <= ord('o')):
+                #a-o
+                return "a_to_o"
+            elif (ord(token[0]) >= ord('p') and ord(token[0]) <= ord('z')):
+                #p-z
+                return "p_to_z"
+            else:
+                #starts with a number
+                return "numbers"
         print("Report")
-        # parse.write_json(REPORT_JSON, {"total_docs": self.total_docs, "unique_words": self.unique_words})
         GROUPS = ["numbers", "a_to_o", "p_to_z"]
         report_batch = [0, 0, 0]
         MAX_GROUP_SIZE = 150000
         
-        inGROUP1 = lambda x: ord(x[0]) >= ord('a') and ord(x[0]) <= ord('o')
-        inGROUP2 = lambda x: ord(x[0]) >= ord('p') and ord(x[0]) <= ord('z')
+        #inGROUP1 = lambda x: ord(x[0]) >= ord('a') and ord(x[0]) <= ord('o')
+        #inGROUP2 = lambda x: ord(x[0]) >= ord('p') and ord(x[0]) <= ord('z')
         
-        unique_words = 0
+        self.unique_words = 0
         
-        token_groups = {GROUPS[0] : {}, GROUPS[1] : {}, GROUPS[2]: {}}    
+        token_groups = {GROUPS[0] : dict(), GROUPS[1] : dict(), GROUPS[2]: dict()}
+        batch_index = 0
+        tokens_batch = dict()
+        while True:
+            try:
+                tokens_batch = parse.load_json(INDEX_JSON+str(batch_index))
+            except OSError as e:
+                print(e.errno)
+                break
+            for token in tokens_batch:
+                token_group = getTokenGroup(token)
+                if token not in token_groups[token_group]:
+                    token_groups[token_group][token] = list()
+                    self.unique_words += 1
+                for obj in tokens_batch[token]:
+                    token_groups[token_group][token].append(obj)
+            batch_index += 1
 
+        for token_group in GROUPS:
+            print("writing", str(token_group), "to", str(token_group) + ".json")
+            parse.write_json(token_group, token_groups[token_group]) 
+        parse.write_json(REPORT_JSON, {"total_docs": self.total_docs, "unique_words": self.unique_words})
+        print("total_docs", self.total_docs, "unique_words", self.unique_words)
+
+
+        '''
         for i in range(6): #self.batch
             print("Batch", i)
             tokens_batch = parse.load_json(INDEX_JSON+str(i))
@@ -222,7 +263,8 @@ class InvertedIndex:
             print(len(parse.load_json(GROUPS[0])) )
             print(len(parse.load_json(GROUPS[1])) )
             print(len(parse.load_json(GROUPS[2])) )
-        print("Unique words:", unique_words)  
+        print("Unique words:", unique_words)
+        '''
         
     def unary_idf(self, term):
         return 1
