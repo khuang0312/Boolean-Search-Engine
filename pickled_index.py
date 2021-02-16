@@ -45,14 +45,14 @@ def get_words(text : str) -> {str : int}:
     return word_frequencies
 
 # given a query, see if we have it on the dictionary structure
-def contains_query(query : str, word_dict : dict) -> bool { 
+def contains_query(query : str, word_dict : dict) -> bool :
     query = query.lower()
     lst_words = query.split("and")
     for word in lst_words:
         if word not in word_dict: 
             return False
     return True
-}
+
 
 def write_file(file_name : str, obj):
     '''Wrapper for writing to file
