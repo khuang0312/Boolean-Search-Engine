@@ -23,6 +23,7 @@ def get_words(text : str) -> {str : int}:
     '''Uses very simplified rules to get words from the file
         Only lowercase alphanumeric characters
 
+
         According to general specifications, we use
         all alphanumeric sequences
 
@@ -42,6 +43,16 @@ def get_words(text : str) -> {str : int}:
                 word_frequencies[word] += 1
  
     return word_frequencies
+
+# given a query, see if we have it on the dictionary structure
+def contains_query(query : str, word_dict : dict) -> bool :
+    query = query.lower()
+    lst_words = query.split("and")
+    for word in lst_words:
+        if word not in word_dict: 
+            return False
+    return True
+
 
 def write_file(file_name : str, obj):
     '''Wrapper for writing to file
