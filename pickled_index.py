@@ -5,8 +5,8 @@ import pickle
 from bs4 import BeautifulSoup
 from nltk.stem import PorterStemmer
 import re
-
-# This version uses Pickle for faster speed...
+from sys import argv, getsizeof
+from sortedcontainers import SortedDict
 
 '''
 Dictionary of tokens mapped to list of tuples (id, raw_frequency)

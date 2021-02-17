@@ -4,4 +4,4 @@ Cedric Lim, 24026891
 Camille Padua, 42962688
 Documents parsed: 55393
 Unique tokens: 1093253
-Size of index: 161 MB
+Size of index: 161000 KB
