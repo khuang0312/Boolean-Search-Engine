@@ -96,8 +96,6 @@ def intersect(p1 : list, p2 : list) -> [(int, int)]:
             i2 += 1
 
     return result
-
-def process_query_str(query : str):
     
 
 def process_query(query : str) -> [(int, int)]:
@@ -130,45 +128,62 @@ def process_query(query : str) -> [(int, int)]:
 
     return result
 
+def transform_url(url : str) -> str:
+    ''' Removes fragment and adds "/" to the end if it 
+        doesn't already have one for consistency
+    '''
+    url = url[:url.find("#")]
+    if not url.endswith("/"):
+        url = url + "/"
+    return url
+
+def is_valid(url : str) -> str:
+    invalid_file_types = [".ph", ".tx", ".htm", "prog", ".ht"]
+    for filetype in invalid_file_types:
+        if url.endswith(filetype):
+            return False
+    return True
 
 if __name__ == "__main__":
     args = sys.argv
     query = " ".join(args[1:])
 
-    ''' Load in the goods '''
-    print("Loading in index and doc...")
+    # ''' Load in the goods '''
+    # print("Loading in index and url...")
     index = load_file("index.bin")
     url = load_file("url.bin")
-    print("Finished loading index and doc...")
-
-    ''' Testing Intersect '''
-    # posting1 = [(1, 1),(5, 2),(7, 1)]
-    # posting2 = [(5, 2),(6,1),(7,2),(10,1)]
-    # posting3 = [(7,3), (5,2)]
-    # ps = PorterStemmer()
-
-    # # place holder index
-    # keys = ["please", "send", "help"]
-    # for i in range(len(keys)):
-    #     keys[i] = ps.stem(keys[i])
-
-    # index = {keys[0] : posting1, keys[1] : posting2, keys[2] : posting3}
-    # test_query = "please send help"
-
-    # print("Testing query '{}'".format(test_query))
-    # result = process_query(test_query)
-
-    # print("result = {}".format(result))
+    # print("Finished loading index and url...")
 
     ''' Running query '''
 
-    print("Query: '{}'".format(query))
+    print("Query: '{}'\n".format(query))
     result = process_query(query)
-    result_url_names = get_url_names(result)
+    result_urls = get_url_names(result)
 
-    print("= Results =")
+    print("= Top 5 Results =\n")
+    r = 0
+    i = 0
+    top5 = list()
 
-    for url in result_url_names[:5]:
+    while r < 5:
+        url = transform_url(result_urls[i])
+        url = url[:url.find("#")]
+
+        if (url not in top5) and (is_valid(url)):
+            top5.append(url)
+            r += 1
+        i += 1
+    
+    for url in top5:
         print(url)
+    print()
+
+'''
+- some urls lead to 404 pages
+- some urls dont have the associated token
+'''
+
+
+    
 
 

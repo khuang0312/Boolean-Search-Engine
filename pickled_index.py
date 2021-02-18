@@ -108,7 +108,7 @@ if __name__ == "__main__":
     unique_tokens = 0 # probably can't be used anymore
     for domain, dir, pages in walk("DEV/"):
         for page in pages:
-            doc_id += 1
+            # doc_id += 1
             print("Parsing doc {}, Unique Tokens: {}".format(doc_id, unique_tokens)) # DEBUG statement
             
             doc_path = domain + "/" + page
@@ -124,6 +124,8 @@ if __name__ == "__main__":
                     index[t] = []
                     unique_tokens += 1 # might have to remove eventually
                 index[t].append((doc_id, tokens[t]))
+            
+            doc_id += 1
             
    
     print("Done.")
