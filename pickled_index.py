@@ -11,13 +11,18 @@ from sortedcontainers import SortedDict
 '''
 Dictionary of tokens mapped to list of tuples (id, raw_frequency)
 '''
-def page_text(filepath: str):
+def page_text(filepath: str) -> (str, str):
+    ''' Returns the page text and URL from the given JSON filename,
+        in the following format (page_text, URL)
+    '''
     page_text = ""
+    url = ""
     with open(filepath) as f:
         html_doc = json.load(f)
         soup = BeautifulSoup(html_doc['content'], "html.parser")
         page_text = soup.get_text()
-    return page_text
+        url = html_doc["url"]
+    return (page_text, url)
 
 def get_words(text : str) -> {str : int}:
     '''Uses very simplified rules to get words from the file
@@ -53,18 +58,32 @@ def contains_query(query : str, word_dict : dict) -> bool :
             return False
     return True
 
-
-def write_file(file_name : str, obj):
+def write_bin(file_name : str, obj):
     '''Wrapper for writing to file
     '''
     with open(file_name, "wb") as f:
         pickle.dump(obj, f)
 
-def load_file(file_name : str):
+def load_bin(file_name : str):
     '''Wrapper for loading a file
     '''
     obj = None
     with open(file_name, "rb") as f:
+        obj = pickle.load(f, encoding="UTF-8")
+    return obj
+
+def write_file(file_name : str, text : str):
+    '''Wrapper for writing to file
+    '''
+    with open(file_name, "w") as f:
+        # pickle.dump(obj, f)
+        f.write(text)
+
+def load_file(file_name : str):
+    '''Wrapper for loading a file
+    '''
+    obj = None
+    with open(file_name, "r") as f:
         obj = pickle.load(f, encoding="UTF-8")
     return obj
 
@@ -75,13 +94,16 @@ def remove_file(file_path: str):
         print("File at {} not found.".format(file_path))
 
 if __name__ == "__main__":
+    
     remove_file("index.bin")
     remove_file("doc.bin")
     remove_file("report.txt")
+    remove_file("url.bin")
     
     doc_id = 0
     index = {}
     docs  = []
+    urls = []
     
     unique_tokens = 0 # probably can't be used anymore
     for domain, dir, pages in walk("DEV/"):
@@ -90,9 +112,13 @@ if __name__ == "__main__":
             print("Parsing doc {}, Unique Tokens: {}".format(doc_id, unique_tokens)) # DEBUG statement
             
             doc_path = domain + "/" + page
-            docs.append(page)
+            page_data = page_text(doc_path)
 
-            tokens = get_words(page_text(doc_path))
+            docs.append(page)
+            urls.append(page_data[1])
+
+            tokens = get_words(page_data[0])
+
             for t in tokens:
                 if t not in index:
                     index[t] = []
@@ -101,8 +127,9 @@ if __name__ == "__main__":
             
    
     print("Done.")
-    write_file("index.bin", index)
-    write_file("doc.bin", docs)
+    write_bin("index.bin", index)
+    write_bin("doc.bin", docs)
+    write_bin("url.bin", urls)
 
     with open("report.txt", "w") as f:
         f.write("Kevin Huang, 45279539\n")
