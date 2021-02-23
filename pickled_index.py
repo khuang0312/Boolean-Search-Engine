@@ -93,23 +93,59 @@ def remove_file(file_path: str):
     except FileNotFoundError:
         print("File at {} not found.".format(file_path))
 
+
+def load_posting(filename : str, token : str):
+    ''' loads posting of given token '''
+    result = list()
+    with open(filename, "r") as f:
+        pos = index_index[token]
+        f.seek(pos)
+        line = f.readline()
+        result = eval(line)
+    return result
+
+def write_index(index : 'SortedDict', index_filename : str):
+    ''' writes index to text file '''
+    global POSITION
+    with open(index_filename, "w") as f:
+        for key in index:
+            line = "{} {}\n".format(key, index[key])
+            f.write(line)
+            index_index[key] = POSITION
+            POSITION += len(line)
+
+
 if __name__ == "__main__":
     
+    BATCH_SIZE = 5_000_000 # in bytes
+
     remove_file("index.bin")
     remove_file("doc.bin")
     remove_file("report.txt")
     remove_file("url.bin")
+    remove_file("index1.txt")
+    remove_file("index2.txt")
+    remove_file("index_index.bin")
     
+    STOP = 0
+    BREAK = False
+    batch_number = 1
     doc_id = 0
-    index = {}
+    POSITION = 0
+    index_index = dict() # key = token, value = file seeking position
+    index = SortedDict() # dict - SortedDict()
     docs  = []
     urls = []
     
     unique_tokens = 0 # probably can't be used anymore
     for domain, dir, pages in walk("DEV/"):
+        if BREAK:
+            break
+
         for page in pages:
-            # doc_id += 1
-            print("Parsing doc {}, Unique Tokens: {}".format(doc_id, unique_tokens)) # DEBUG statement
+            
+            print("Parsing doc {}, Unique Tokens: {}, Size of Index {}, STOP {}".format(
+                doc_id, unique_tokens, getsizeof(index), STOP)) # DEBUG statement
             
             doc_path = domain + "/" + page
             page_data = page_text(doc_path)
@@ -127,19 +163,49 @@ if __name__ == "__main__":
             
             doc_id += 1
             
+
+            # if getsizeof(index) > BATCH_SIZE:
+            #     # write to file
+            #     index_filename = "index" + str(batch_number) + ".txt"
+            #     write_index(index, index_filename)
+
+            #     # start empty current index, start a new one
+            #     batch_number += 1
+            #     index = SortedDict()
+            
+            if STOP == 100:
+                index_filename = "index" + str(batch_number) + ".txt"
+                write_index(index, index_filename)
+                
+                batch_number += 1
+                index = SortedDict()
+            
+            elif STOP == 200:
+                index_filename = "index" + str(batch_number) + ".txt"
+                write_index(index, index_filename)
+                
+                batch_number += 1
+                index = SortedDict()
+
+                BREAK = True
+                break
+            
+            STOP += 1
+
    
     print("Done.")
-    write_bin("index.bin", index)
+    # write_bin("index.bin", index)
     write_bin("doc.bin", docs)
     write_bin("url.bin", urls)
+    write_bin("index_index.bin", index_index)
 
-    with open("report.txt", "w") as f:
-        f.write("Kevin Huang, 45279539\n")
-        f.write("Klim Rayskiy, 5368211\n")
-        f.write("Cedric Lim, 24026891\n")
-        f.write("Camille Padua, 42962688\n")
-        f.write("Documents parsed: {}\n".format(doc_id))
-        f.write("Unique tokens: {}\n".format(unique_tokens))
-        f.write("Size of index: {} B\n".format(getsize("index.bin")))
-        f.write("Size of index: {} KB\n".format(getsize("index.bin") / 1000 ))
-        f.write("Size of index: {} MB\n".format(getsize("index.bin") / 1000000))
+    # with open("report.txt", "w") as f:
+    #     f.write("Kevin Huang, 45279539\n")
+    #     f.write("Klim Rayskiy, 5368211\n")
+    #     f.write("Cedric Lim, 24026891\n")
+    #     f.write("Camille Padua, 42962688\n")
+    #     f.write("Documents parsed: {}\n".format(doc_id))
+    #     f.write("Unique tokens: {}\n".format(unique_tokens))
+    #     f.write("Size of index: {} B\n".format(getsize("index.bin")))
+    #     f.write("Size of index: {} KB\n".format(getsize("index.bin") / 1000 ))
+    #     f.write("Size of index: {} MB\n".format(getsize("index.bin") / 1000000))
