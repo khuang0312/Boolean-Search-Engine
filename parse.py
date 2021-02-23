@@ -2,6 +2,10 @@
 # Webpages in this context are the JSON files in the "DEV/" folder
 
 from bs4 import BeautifulSoup
+<<<<<<< HEAD
+from nltk.stem import PorterStemmer
+=======
+>>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
 import json
 import re
 
@@ -33,6 +37,20 @@ def get_words(text : str) -> (int, {str : int}):
     '''
     words_found = 0
     word_frequencies = {}
+<<<<<<< HEAD
+    ps = PorterStemmer()
+    for word in re.finditer(r'([a-zA-Z0-9]+)', text):
+        try:
+            word = ps.stem(word.group(0).lower())
+        except IndexError:
+            print("Something happened with term {}".format(word))
+        else:
+            if word not in word_frequencies:
+                words_found += 1
+                word_frequencies[word] = 1
+            else:
+                word_frequencies[word] += 1
+=======
     
     for word in re.finditer(r'([a-zA-Z0-9]+)', text):
         word = word.group(0).lower()
@@ -41,6 +59,7 @@ def get_words(text : str) -> (int, {str : int}):
             word_frequencies[word] = 1
         else:
             word_frequencies[word] += 1
+>>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
  
     return words_found, word_frequencies
 
