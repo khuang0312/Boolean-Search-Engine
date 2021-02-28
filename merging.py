@@ -51,31 +51,31 @@ def process_index_segment(index_arr : list, positions : [int], LINES=10) -> [int
     # write to disk
     # then readline on the files that had the minimum word (this "catches them up")
     merged_index = SortedDict()
-    lines = [process_line(i.readline()) for i in index_arr] 
+    lines = [process_line(i.readline()) for i in index_arr]
+
     for i in range(LINES):
         min_word = min(lines, key=lambda x : x[0] if x != None else "{")
-        
         for j in range(len(lines)):
             # empty or whitespace-only line means we hit end of file
             if lines[j] == None:
                 positions[j] = -1
-                next_lines.append("")
             else: 
                 token, postings = lines[j]
+                print(token)
                 if token == min_word:
+                    
                     if token not in merged_index:
                         merged_index[token] = postings
                     else:
                         merged_index[token] += postings
-                    positions[j] = index_arr[j].tell()
                     lines[j] = process_line(index_arr[j].readline())
+                    positions[j] = index_arr[j].tell()
     
     # write to file
-    
-    return positions      
     append_index(merged_index, "merged_index.txt")
     
-    return positions
+    return positions      
+    
 
 def no_more_lines(positions : [int]) -> bool:
     '''If all file positions are -1...
@@ -107,14 +107,8 @@ if __name__ == "__main__":
 
     # recurse through all files to merge them
     positions = [0 for i in range(INDEX_COUNT)]
-
-        input()    while not no_more_lines(positions):
-        print(positions)
-        positions = process_index_segment(indexes, positions)
     while not no_more_lines(positions):
-        print(positions)
-        positions = process_index_segment(indexes, positions)
-    while not no_more_lines(positions):
+        input()
         print(positions)
         positions = process_index_segment(indexes, positions)
     
