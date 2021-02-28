@@ -99,6 +99,15 @@ def close_files(files : '[File]') -> None:
         f.close()
 
 if __name__ == "__main__":
+    # tf-idf score
+    # posting -> (doc number, tf)
+    # 1+log10(tf) if tf > 0 else 0
+    # log10 (N / amount of d containing t)
+
+    # postings -> (doc number, pos1, pos2)
+    # 1 + log10(len(index[token][posting]) - 1)
+    # log10 (N / len(index[token] - 1))
+
 
     POSITION = 0
     index_index = SortedDict()

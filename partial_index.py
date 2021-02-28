@@ -10,7 +10,7 @@ from sortedcontainers import SortedDict
 import parse
 
 '''
-Dictionary of tokens mapped to list of tuples (id, raw_frequency)
+Dictionary of tokens mapped to list of lists [doc_id, positions in doc]
 '''
 def page_text(filepath: str) -> (str, str):
     ''' Returns the page text and URL from the given JSON filename,
@@ -25,10 +25,9 @@ def page_text(filepath: str) -> (str, str):
         url = html_doc["url"]
     return (page_text, url)
 
-def get_words(text : str) -> {str : int}:
+def get_words(text : str) -> {str : [int]}:
     '''Uses very simplified rules to get words from the file
         Only lowercase alphanumeric characters
-
 
         According to general specifications, we use
         all alphanumeric sequences
@@ -37,6 +36,8 @@ def get_words(text : str) -> {str : int}:
     '''
     word_frequencies = {}
     ps = PorterStemmer()
+
+    word_pos = 0
     for word in re.finditer(r'([a-zA-Z0-9]+)', text):
         try:
             word = ps.stem(word.group(0).lower())
@@ -44,30 +45,12 @@ def get_words(text : str) -> {str : int}:
             print("Something happened with term {}".format(word))
         else:
             if word not in word_frequencies:
-                word_frequencies[word] = 1
-            else:
-                word_frequencies[word] += 1
+                word_frequencies[word] = []
+            word_frequencies[word].append(word_pos)
+            word_pos += 1
  
     return word_frequencies
 
-# given a query, see if we have it on the dictionary structure
-def contains_query(query : str, word_dict : dict) -> bool :
-    query = query.lower()
-    lst_words = query.split("and")
-    for word in lst_words:
-        if word not in word_dict: 
-            return False
-    return True
-
-def load_posting(filename : str, token : str):
-    ''' loads posting of given token '''
-    result = list()
-    with open(filename, "r") as f:
-        pos = index_index[token]
-        f.seek(pos)
-        line = f.readline()
-        result = eval(line)
-    return result
 
 def write_index(index : 'SortedDict', index_filename : str):
     ''' writes index to text file '''
@@ -96,8 +79,8 @@ if __name__ == "__main__":
     unique_tokens = 0 # probably can't be used anymore
     for domain, dir, pages in walk("DEV/"):
         for page in pages:
-            print("Parsing doc {}, Unique Tokens: {}, Size of Index {}, STOP {}".format(
-                doc_id, unique_tokens, getsizeof(index), STOP)) # DEBUG statement
+            print("Parsing doc {}, Unique Tokens: {}, Size of Index {}".format(
+                doc_id, unique_tokens, getsizeof(index))) # DEBUG statement
             
             doc_path = domain + "/" + page
             page_data = page_text(doc_path)
@@ -111,8 +94,7 @@ if __name__ == "__main__":
                 if t not in index:
                     index[t] = []
                     unique_tokens += 1 # might have to remove eventually
-                index[t].append((doc_id, tokens[t]))
-            
+                index[t].append([doc_id] + tokens[t])            
             doc_id += 1
             
 

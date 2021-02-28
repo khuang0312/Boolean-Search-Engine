@@ -41,3 +41,26 @@ def remove_file(file_path: str):
         remove(file_path)
     except FileNotFoundError:
         print("File at {} not found.".format(file_path))
+
+
+# not sure if we need but they might come in handy
+def load_posting(filename : str, token : str):
+    ''' loads posting of given token '''
+    result = list()
+    with open(filename, "r") as f:
+        pos = index_index[token]
+        f.seek(pos)
+        line = f.readline()
+        result = eval(line)
+    return result
+
+# given a query, see if we have it on the dictionary structure
+def contains_query(query : str, word_dict : dict) -> bool :
+    query = query.lower()
+    lst_words = query.split("and")
+    for word in lst_words:
+        if word not in word_dict: 
+            return False
+    return True
+
+
