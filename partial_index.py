@@ -1,4 +1,4 @@
-from os import walk, remove
+from os import walk
 from os.path import getsize
 import json
 import pickle
@@ -7,6 +7,7 @@ from nltk.stem import PorterStemmer
 import re
 from sys import argv, getsizeof
 from sortedcontainers import SortedDict
+import parse
 
 '''
 Dictionary of tokens mapped to list of tuples (id, raw_frequency)
@@ -58,42 +59,6 @@ def contains_query(query : str, word_dict : dict) -> bool :
             return False
     return True
 
-def write_bin(file_name : str, obj):
-    '''Wrapper for writing to file
-    '''
-    with open(file_name, "wb") as f:
-        pickle.dump(obj, f)
-
-def load_bin(file_name : str):
-    '''Wrapper for loading a file
-    '''
-    obj = None
-    with open(file_name, "rb") as f:
-        obj = pickle.load(f, encoding="UTF-8")
-    return obj
-
-def write_file(file_name : str, text : str):
-    '''Wrapper for writing to file
-    '''
-    with open(file_name, "w") as f:
-        # pickle.dump(obj, f)
-        f.write(text)
-
-def load_file(file_name : str):
-    '''Wrapper for loading a file
-    '''
-    obj = None
-    with open(file_name, "r") as f:
-        obj = pickle.load(f, encoding="UTF-8")
-    return obj
-
-def remove_file(file_path: str):
-    try:
-        remove(file_path)
-    except FileNotFoundError:
-        print("File at {} not found.".format(file_path))
-
-
 def load_posting(filename : str, token : str):
     ''' loads posting of given token '''
     result = list()
@@ -106,25 +71,17 @@ def load_posting(filename : str, token : str):
 
 def write_index(index : 'SortedDict', index_filename : str):
     ''' writes index to text file '''
-    global POSITION
+    
     with open(index_filename, "w") as f:
         for key in index:
             line = "{} {}\n".format(key, index[key])
             f.write(line)
-            index_index[key] = POSITION
-            POSITION += len(line)
 
 if __name__ == "__main__":
     
     BATCH_SIZE = 5_000_000 # in bytes
 
-    remove_file("index.bin")
-    remove_file("doc.bin")
-    remove_file("report.txt")
-    remove_file("url.bin")
-    remove_file("index1.txt")
-    remove_file("index2.txt")
-    remove_file("index_index.bin")
+    parse.cleanup_files()
     
     STOP = 0
     BREAK = False
@@ -138,11 +95,7 @@ if __name__ == "__main__":
     
     unique_tokens = 0 # probably can't be used anymore
     for domain, dir, pages in walk("DEV/"):
-        if BREAK:
-            break
-
         for page in pages:
-            
             print("Parsing doc {}, Unique Tokens: {}, Size of Index {}, STOP {}".format(
                 doc_id, unique_tokens, getsizeof(index), STOP)) # DEBUG statement
             
@@ -163,48 +116,19 @@ if __name__ == "__main__":
             doc_id += 1
             
 
-            # if getsizeof(index) > BATCH_SIZE:
-            #     # write to file
-            #     index_filename = "index" + str(batch_number) + ".txt"
-            #     write_index(index, index_filename)
+            if getsizeof(index) > BATCH_SIZE:
+                
+                # write to file
+                index_filename = "index" + str(batch_number) + ".txt"
+                print("Writing {} to disk...".format(index_filename))
+                write_index(index, index_filename)
 
-            #     # start empty current index, start a new one
-            #     batch_number += 1
-            #     index = SortedDict()
-            
-            if STOP == 100:
-                index_filename = "index" + str(batch_number) + ".txt"
-                write_index(index, index_filename)
-                
-                batch_number += 1
-                index = SortedDict()
-            
-            elif STOP == 200:
-                index_filename = "index" + str(batch_number) + ".txt"
-                write_index(index, index_filename)
-                
+                # start empty current index, start a new one
                 batch_number += 1
                 index = SortedDict()
 
-                BREAK = True
-                break
-            
-            STOP += 1
+    parse.write_bin("doc.bin", docs)    # maps docID to file names
+    parse.write_bin("url.bin", urls)    # maps docID to URLs
 
-   
     print("Done.")
-    # write_bin("index.bin", index)
-    write_bin("doc.bin", docs)
-    write_bin("url.bin", urls)
-    write_bin("index_index.bin", index_index)
-
-    # with open("report.txt", "w") as f:
-    #     f.write("Kevin Huang, 45279539\n")
-    #     f.write("Klim Rayskiy, 5368211\n")
-    #     f.write("Cedric Lim, 24026891\n")
-    #     f.write("Camille Padua, 42962688\n")
-    #     f.write("Documents parsed: {}\n".format(doc_id))
-    #     f.write("Unique tokens: {}\n".format(unique_tokens))
-    #     f.write("Size of index: {} B\n".format(getsize("index.bin")))
-    #     f.write("Size of index: {} KB\n".format(getsize("index.bin") / 1000 ))
-    #     f.write("Size of index: {} MB\n".format(getsize("index.bin") / 1000000))
+    

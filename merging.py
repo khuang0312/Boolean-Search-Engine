@@ -1,6 +1,6 @@
 import pickle
 from itertools import zip_longest
-from pickled_index import load_bin, remove_file, write_bin
+from partial_index import load_bin, remove_file, write_bin
 from sortedcontainers import SortedDict
 
 
