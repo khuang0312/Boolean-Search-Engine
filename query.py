@@ -73,6 +73,7 @@ def intersect(p1 : list, p2 : list) -> [(int, int)]:
         Returns list of tuples (docIDs, term freq).
         len(p1) must be less than len(p2).
         Used psudeo code form lec 15, slide 32.
+        Used for AND queries
     '''
     
     result = list()

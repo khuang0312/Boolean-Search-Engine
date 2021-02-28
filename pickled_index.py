@@ -114,7 +114,6 @@ def write_index(index : 'SortedDict', index_filename : str):
             index_index[key] = POSITION
             POSITION += len(line)
 
-
 if __name__ == "__main__":
     
     BATCH_SIZE = 5_000_000 # in bytes
@@ -131,7 +130,7 @@ if __name__ == "__main__":
     BREAK = False
     batch_number = 1
     doc_id = 0
-    POSITION = 0
+
     index_index = dict() # key = token, value = file seeking position
     index = SortedDict() # dict - SortedDict()
     docs  = []
