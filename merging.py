@@ -1,8 +1,7 @@
 import pickle
-from itertools import zip_longest
-from partial_index import load_bin, remove_file, write_bin
+from parse import count_partial_indexes, load_bin, remove_file, write_bin
 from sortedcontainers import SortedDict
-
+from math import log10
 
 
 def append_index(index : 'SortedDict', index_filename : str):
@@ -47,6 +46,8 @@ def process_index_segment(index_arr : list, positions) -> [int]:
         Write the completed mereged index to a new file...
  
     '''
+    global N
+
     for index, last_pos in zip(index_arr, positions):
         if last_pos != -1:
             index.seek(last_pos)
@@ -66,6 +67,13 @@ def process_index_segment(index_arr : list, positions) -> [int]:
                 else:
                     merged_index[token] += postings
                 positions[j] = index_arr[j].tell()
+
+    for token in merged_index:
+        df = len(merged_index[token])
+        for posting in merged_index[token]:
+            tf = 1 + log10(len(posting) - 2) # posting contain doc_id and tf_idf score
+            idf = log10(N / df)
+            posting[1] = tf * idf
     
     # write to file
     append_index(merged_index, "merged_index.txt")
@@ -81,10 +89,9 @@ def no_more_lines(positions : [int]) -> bool:
             return False
     return True
 
-def open_files(INDEX_COUNT=3) -> "[File]":
+def open_files(INDEX_COUNT=1) -> "[File]":
     # open index files
     indexes = []
-    # INDEX_COUNT = 3 # represents the amount of indexes...
     for i in range(0,INDEX_COUNT):
         try:
             index_path = "index" + str(i+1) + ".txt"
@@ -105,18 +112,19 @@ if __name__ == "__main__":
     # log10 (N / amount of d containing t)
 
     # postings -> (doc number, pos1, pos2)
-    # 1 + log10(len(index[token][posting]) - 1)
-    # log10 (N / len(index[token] - 1))
-
-
+    # 1 + log10(len(index[token][posting]) - 2)
+    # log10 (N / len(index[token]) - 2)
     POSITION = 0
     index_index = SortedDict()
+    index_info = load_bin("index_info.bin")
+    N = index_info["doc_count"]             # N is the amount of words obtained...
 
     remove_file("merged_index.txt")
     remove_file("index_index.bin")
     
-    INDEX_COUNT = 3
-    indexes = open_files()
+    INDEX_COUNT = count_partial_indexes()
+
+    indexes = open_files(INDEX_COUNT)
 
     # recurse through all files to merge them
     positions = [0 for i in range(INDEX_COUNT)]

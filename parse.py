@@ -1,11 +1,24 @@
 from os import remove, listdir, scandir
+import pickle
 
 def cleanup_files():
+    '''Deletes all files created by the code...
+    '''
     for f in listdir("."):
         for i in ["index", "doc", "url"]:
             if f.startswith(i):
                 print("Removing file {}".format(f))
                 remove_file(f)
+
+def count_partial_indexes():
+    '''Counts partial indexes in the file...
+    '''
+    count = 0 
+    for f in listdir("."):
+        if f.startswith("index"):
+            count += 1
+    return count
+            
 
 def write_bin(file_name : str, obj):
     '''Wrapper for writing to file
