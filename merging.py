@@ -114,6 +114,7 @@ if __name__ == "__main__":
     # postings -> (doc number, pos1, pos2)
     # 1 + log10(len(index[token][posting]) - 2)
     # log10 (N / len(index[token]) - 2)
+    
     POSITION = 0
     index_index = SortedDict()
     index_info = load_bin("index_info.bin")

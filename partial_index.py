@@ -71,7 +71,7 @@ def index_info(unique_tokens:int=0, doc_count:int=0, partial_indexes:int=0):
 if __name__ == "__main__":
     parse.cleanup_files()
     
-    BATCH_SIZE = 5_000_000 # in bytes
+    BATCH_SIZE = 10_486_240 # in bytes 
     batch_number = 1
     doc_id = 0
     unique_tokens = 0 # probably can't be used anymore

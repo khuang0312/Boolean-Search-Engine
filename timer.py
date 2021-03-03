@@ -32,10 +32,17 @@ class Timer:
         return self.end != 0
 
     def stop(self):
-        '''Stops timer, the end time will be permanently the time when
+        '''Stops timer, the end time will be the time when
             this method is called
         '''
         self.end = perf_counter()
+    
+    def reset(self, name:str="new timer"):
+        '''Reset timer such that start time is now the current time...
+        '''
+        self.name = name
+        self.end = 0
+        self.start = perf_counter()
     
     def time_elapsed(self) -> float:
         '''Returns fractional seconds
