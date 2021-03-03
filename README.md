@@ -1,5 +1,5 @@
-<h1>CS 121 - Search Engine (M3)</h1>
-<h2>Team Members</h2>
+# CS 121 - Search Engine (M3)
+## Team Members
   - Kevin Huang  
   - Camille Padua  
   - Klim Rayskiy  
