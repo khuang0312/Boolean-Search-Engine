@@ -5,20 +5,25 @@
 * Klim Rayskiy
 * Cedric Lim
 
-<h2>Instructions on How to Set Up</h2>
+<h2>How to Set Up</h2>
 1. Install the required dependencies
-    * NLTK 3.5 - needed for PorterStemmer
-    * BeautifulSoup 4.9.x - needed for BeautifulSoup
-    * sortedcontainers - needed for SortedDict
+* NLTK 3.5 - needed for PorterStemmer
+* BeautifulSoup 4.9.x - needed for BeautifulSoup
+* sortedcontainers - needed for SortedDict
+
+```
+pip install --user nltk bs4 sortedcontainers
+```
 
 2. Extract the developer.zip folder so that the resulting "DEV" folder
-is within the same folder as the Python code files
+is in the root directory with the Python code files: 
+partial\_index.py, merging.py, and query.py 
 
-2. Run partial\_index.py. This file creates the partial index files.
+3. Run partial\_index.py. This file creates the partial index files.
 Each partial index file is labeled "index\{number\}.txt".
 
-3. Run merging.py. This file will merge the partial index files into 
+4. Run merging.py. This file will merge the partial index files into 
 one complete merged index.
 
-4. Run query.py. You'll be prompted for input. Type in your search terms
+5. Run query.py. You'll be prompted for input. Type in your search terms
 and await the results!
