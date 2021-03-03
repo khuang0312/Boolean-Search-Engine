@@ -1,9 +1,9 @@
 <h1>CS 121 - Search Engine (M3)</h1>
 <h2>Team Members</h2>
-- Kevin Huang
-- Camille Padua
-- Klim Rayskiy
-- Cedric Lim
+  - Kevin Huang
+  - Camille Padua
+  - Klim Rayskiy
+  - Cedric Lim
 
 <h2>How to Set Up</h2>
 1. Install the required dependencies
