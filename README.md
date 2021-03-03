@@ -1,5 +1,5 @@
 # CS 121 - Search Engine (M3)
-Given search terms, this search engine can retrieve documents containing the terms from a folder of documents.
+Given search terms, this search engine retrieve documents containing the terms from a folder of documents.
 
 For example, typing the word "acm" will give pages containing the word "acm".
 
