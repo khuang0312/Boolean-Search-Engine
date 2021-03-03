@@ -119,6 +119,7 @@ def process_query(query : str) -> [str]:
         
     '''
     query_tfidf_vector = get_query_tfidf_vector(query)
+    pass
     
 
 
