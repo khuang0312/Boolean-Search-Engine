@@ -113,8 +113,17 @@ if __name__ == "__main__":
                 batch_number += 1
                 index = SortedDict()
         
+        
+
         # if batch_number == 3: # needed to stop loop prematurely to test 
         #    break
+
+    if getsizeof(index) > 0: # writes remaining file index
+        index_filename = "index" + str(batch_number) + ".txt"
+        print("Writing last index to disk")
+        print("Writing {} to disk...".format(index_filename))
+        write_index(index, index_filename)
+        batch_number += 1
 
     parse.write_bin("doc.bin", docs)         # maps docID to file names
     parse.write_bin("url.bin", urls)         # maps docID to URLs
