@@ -10,7 +10,7 @@
     - NLTK 3.5 - needed for PorterStemmer
     - BeautifulSoup 4.9.x - needed for BeautifulSoup
     - sortedcontainers - needed for SortedDict
-    - ```pip install --user nltk bs4 sortedcontainers```
+    - This can be done with the command: ```pip install --user nltk bs4 sortedcontainers```
 
 2. Extract the developer.zip folder so that the resulting "DEV" folder
 is in the root directory with the Python code files: 
