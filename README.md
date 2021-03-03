@@ -10,11 +10,12 @@ For example, typing the word "acm" will give pages containing the word "acm".
   - Cedric Lim
 
 ## How to Set Up
-1. Install the required dependencies
+1. Install the required dependencies and files
     - NLTK 3.5 - needed for PorterStemmer
     - BeautifulSoup 4.9.x - needed for BeautifulSoup
     - sortedcontainers - needed for SortedDict
     - This can be done with the command: ```pip install --user nltk bs4 sortedcontainers```
+    - Make sure you have the "developer.zip" folder as well.
 
 2. Extract the developer.zip folder so that the resulting "DEV" folder
 is in the root directory with the Python code files: 
