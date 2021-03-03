@@ -5,7 +5,7 @@
   - Klim Rayskiy  
   - Cedric Lim  
 
-<h2>How to Set Up</h2>
+## How to Set Up
 1. Install the required dependencies
   - NLTK 3.5 - needed for PorterStemmer
   - BeautifulSoup 4.9.x - needed for BeautifulSoup
