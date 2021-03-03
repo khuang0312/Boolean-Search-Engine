@@ -36,7 +36,9 @@ def computeWordFrequency(tokens:[str]) -> dict:
     return result
 
 def get_postings(token : str) -> [tuple]:
-    ''' Returns the postings of the given token '''
+    ''' Returns the postings of the given token 
+        CURRENTLY ONLY WORKS FOR IN MEMORY INDEX
+    '''
     try:
         global merged_index
         return  merged_index[token]
@@ -59,8 +61,7 @@ def get_doc_length(weights:[int]) -> float:
     doc_length = math.sqrt(val)
     return doc_length
 
-
-def get_query_tfidf_vector(query : str) -> dict:
+def get_query_tfidf_vectors(query : str) -> dict:
     ''' Calcuates ALL tf-idf vectors for the given query.
         Includes normalize value
         key = token | value = tf-idf vector
@@ -69,7 +70,7 @@ def get_query_tfidf_vector(query : str) -> dict:
     ps = PorterStemmer()
     tokens = [ps.stem(token) for token in query.split()]
     result = dict()
-    weights = list
+    weights = list()
     word_freq = computeWordFrequency(tokens)
 
     ''' Calculate all the vectors (except for normalized value) '''
@@ -89,7 +90,7 @@ def get_query_tfidf_vector(query : str) -> dict:
         weights.append(wt)
         result[token] = tfidf_vector
 
-    ''' Calculate normalized calue '''
+    ''' Calculate normalized value '''
     doc_length = get_doc_length(weights)
     for token in result:
         result[token]["normalize"] = result[token]["wt"] / doc_length
@@ -99,9 +100,8 @@ def get_query_tfidf_vector(query : str) -> dict:
 def get_document_tfidf_vector(token : str, docID : int) -> dict:
     ''' Calculates the weighted tf-idf vector for the given token.
         Still need to calculate normalize value.
+        Token should already be stemmed
     '''
-    ps = PorterStemmer()
-    token = ps.stem(token)
     posting = get_doc_posting(token, docID)
     tf_raw = len(posting) - 2
     tf_wt = 1+log10(tf_raw)
@@ -118,7 +118,30 @@ def process_query(query : str) -> [str]:
     ''' Returns a list of resulting URLs using the given query
         
     '''
-    query_tfidf_vector = get_query_tfidf_vector(query)
+
+    ''' calculate query vector '''
+    query_tfidf_vector = get_query_tfidf_vectors(query) # dict of vectors for each token in query
+    
+    ''' stem the tokens '''
+    ps = PorterStemmer()
+    tokens = [ps.stem(token) for token in query.split()]
+
+    ''' calculate doc vectors '''
+    doc_vectors = dict() # key = docID | value = vector
+    weights = list()
+    # token [ [docID, tf-idf, pos ...] [...] ]
+    for token in tokens:
+        postings_list = get_posting(token)
+        for doc in postings_list:
+            
+            docID = doc[0]
+            vector = get_document_tfidf_vector(token, docID)
+            doc_vectors[docID] = vector
+            weights.append(vector["wt"])
+    
+    ''' How to calculate score???  ''' 
+    
+
     pass
     
 
