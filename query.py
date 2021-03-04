@@ -6,6 +6,7 @@ import parse
 from timer import Timer, to_milliseconds
 import math
 import time
+from collections import OrderedDict
 
 '''
 Queries to test:
@@ -69,23 +70,19 @@ def get_query_tfidf_vectors(query : str) -> dict:
     global DOC_COUNT
     ps = PorterStemmer()
     tokens = [ps.stem(token) for token in query.split()]
-    result = dict()
+    result = OrderedDict()
     weights = list()
     word_freq = computeWordFrequency(tokens)
 
     ''' Calculate all the vectors (except for normalized value) '''
     for token in tokens:
-        df = len(get_postings[token])
+        df = len(get_postings(token))
         tf_wt = 1+log10(word_freq[token])
         idf = log10(DOC_COUNT / df)
         wt = tf_wt * idf
         tfidf_vector = {
-            "tf-raw" : word_freq[token],
-            "tf-wt" : tf_wt,
-            "df" : df,
-            "idf" : idf,
             "wt" : wt,
-            "normalize" : 0
+            "normalize" : 0,
         }
         weights.append(wt)
         result[token] = tfidf_vector
@@ -99,7 +96,7 @@ def get_query_tfidf_vectors(query : str) -> dict:
 
 def get_document_tfidf_vector(token : str, docID : int) -> dict:
     ''' Calculates the weighted tf-idf vector for the given token.
-        Still need to calculate normalize value.
+        Still need to calculate "normalize" value
         Token should already be stemmed
     '''
     posting = get_doc_posting(token, docID)
@@ -107,16 +104,50 @@ def get_document_tfidf_vector(token : str, docID : int) -> dict:
     tf_wt = 1+log10(tf_raw)
 
     result = {
-        "tf-raw": tf_raw, 
-        "tf-wt" :  tf_wt,
         "wt" : tf_wt, 
-        "normalize" : 0} 
+        "normalize" : 0,
+        } 
     
     return result
 
-def process_query(query : str) -> [str]:
-    ''' Returns a list of resulting URLs using the given query
-        
+def get_doc_vectors(query_tokens : [str]) -> dict:
+    ''' Given the list of stemmed query tokens,
+        Calculate doc vectors for cosin similarity scoring
+    '''
+    doc_vectors = dict()
+    for token in tokens:
+        postings_list = get_posting(token)
+        for doc in postings_list:
+            docID = doc[0]
+            vector = get_document_tfidf_vector(token, docID)
+            if docID not in doc_vectors:
+                doc_vectors[docID] = {token : vector}
+            else:
+                doc_vectors[docID][token] = vector 
+    return doc_vectors
+
+def normalize_doc_wts(doc_vectors : dict): 
+    ''' 
+    {
+        token : vector dict,
+        token : vector dict
+    }
+    '''
+    weights = list()
+    weights = [doc_vectors[token]["wt"] for token in doc_vectors]
+    # for token in doc_vectors:
+    #     weights.append(doc_vectors[token]["wt"])
+    
+    doc_length = get_doc_length(weights)
+
+    for token in doc_vectors:
+        doc_vectors[token]["normalize"] = doc_vectors[token]["wt"] / doc_length
+    
+    return doc_vectors
+
+
+def process_query(query : str) -> dict:
+    ''' Returns a dict of docIDs and their scores
     '''
 
     ''' calculate query vector '''
@@ -127,38 +158,52 @@ def process_query(query : str) -> [str]:
     tokens = [ps.stem(token) for token in query.split()]
 
     ''' calculate doc vectors '''
-    doc_vectors = dict() # key = docID | value = vector
-    weights = list()
-    # token [ [docID, tf-idf, pos ...] [...] ]
-    for token in tokens:
-        postings_list = get_posting(token)
-        for doc in postings_list:
-            
-            docID = doc[0]
-            vector = get_document_tfidf_vector(token, docID)
-            doc_vectors[docID] = vector
-            weights.append(vector["wt"])
+    # docID : {
+    #     "token1" : {vector dict},
+    #     "token2" : {vector dict}, ...
+    # }
     
-    ''' How to calculate score???  ''' 
+    doc_vectors = get_doc_vectors(tokens) 
+    
+    ''' Normalize doc vector weights '''
+    for docID in doc_vectors:
+        doc_vectors[docID] = normalize_doc_wts(doc_vectors[docID])
+
+    ''' Calculate scores ''' 
+    scores = dict()
+    for docID in doc_vectors:
+        result = 0
+        for token in query_tfidf_vector:
+            if token in doc_vector[docID]:                
+                result += doc_vector[docID][token]["normalize"] * query_tfidf_vector[token]["normalize"]
+    scores = sorted(scores.items(), key=lambda x:x[1])
+    return scores
     
 
-    pass
-    
 
+# def get_url_names(postings : [(int, int)]):
+#     ''' Given the list of postings, return a list of the 
+#         associated URLs
+#     '''
+#     global url
+#     result = list()
+#     # print("posting: {}".format(postings))
+#     for posting in postings:
+#         ID = posting[0]
+#         print(ID)
+#         result.append(url[ID])
 
-def get_url_names(postings : [(int, int)]):
-    ''' Given the list of postings, return a list of the 
-        associated URLs
-    '''
+#     return result
+
+def get_url_names(scores : dict) -> [str]:
+    ''' Given the results {docID:scores} dict, return a list of corresponding URLs '''
     global url
     result = list()
-    # print("posting: {}".format(postings))
-    for posting in postings:
-        ID = posting[0]
-        print(ID)
+    for docID in scores:
         result.append(url[ID])
 
     return result
+
 
 def transform_url(url : str) -> str:
     ''' Removes fragment and adds "/" to the end if it 
@@ -183,8 +228,8 @@ if __name__ == "__main__":
     ''' Load in the goods '''
     # print("Loading index into memory...")
 
-    # url = parse.load_bin("url.bin")
-    # merged_index = parse.load_bin("index.bin") # temp, replace with txt index later
+    url = parse.load_bin("testing/url.bin")
+    merged_index = parse.load_bin("testing/index.bin") # temp, replace with txt index later
     
     # print("Done.")
 
@@ -194,29 +239,25 @@ if __name__ == "__main__":
         query = input("Input query: ")
         start = time.time()
 
-        # result = process_query(query)
+        result = process_query(query)
 
         end = time.time()
         print("Search time elapsed: {} s".format(end - start))
 
-        # result_urls = get_url_names(result)
+        ''' Printing the results '''
+        result_urls = get_url_names(result)
+        top5 = list()
+        n=0
+        while n < 5:
+            url = transform_url(result_urls[i])
+            url = url[:url.find("#")]
 
-        # r = 0
-        # i = 0
-        # top5 = list()
-
-        # while r < 5:
-        #     url = transform_url(result_urls[i])
-        #     url = url[:url.find("#")]
-
-        #     if url not in top5:
-        #         top5.append(url)
-        #         r += 1
-        #     i += 1
+            if url not in top5:
+                top5.append(url)
         
-        # for url in top5:
-        #     print(url)
-        # print()
+        for url in top5:
+            print(url)
+        print()
 
 
     
