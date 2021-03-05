@@ -21,7 +21,6 @@ INDEX DATA STRUCTURE
 {token : [(doc_id, )]}
 '''
 
-
 ''' 
 REGEX PATTERNS
 
@@ -223,7 +222,7 @@ def get_query_terms(query_str : str) -> [str]:
     '''Returns a list of stemmed tokens...
     '''
     ps = PorterStemmer()
-    return [ps.stem(token) for token in query_str.split()]:
+    return [ps.stem(token) for token in query_str.split()]
 
 def get_query_postings(query_list : [str]) -> dict:
     ''' Returns dict mapping stemmed token to posting 
@@ -235,7 +234,7 @@ def get_query_postings(query_list : [str]) -> dict:
             postings[token] = get_postings(token)
     return postings
 
-def query_results(query: string):
+
     
     
 if __name__ == "__main__":
@@ -248,38 +247,22 @@ if __name__ == "__main__":
     url = parse.load_bin("url.bin")
     doc = parse.load_bin("doc.bin")
     index_index = parse.load_bin("index_index.bin")
-    merged_index = open("merged_index.txt", "r")
-    
-    print("Done.")
 
-    ''' Getting query input '''
-    
-    while (1):
-        
-        query = input("Input query: ")
-        
-        QUERY_TERMS = get_query_terms(query)
-        QUERY_POSTINGS = get_query_postings(query_list)
+    with open("merged_index.txt", "r") as merged_index:
+        print("Done.")
+        ''' Getting query input '''
+        while True:
+            query = input("Input query: ")
+            if query == ":q":
+                break
+            
+            QUERY_TERMS = get_query_terms(query)
+            QUERY_POSTINGS = get_query_postings(query_list)
 
-        result = process_query(QUERY_TERMS)
+            result = process_query(QUERY_TERMS)
 
-        ''' Printing the results '''
-        result_urls = get_url_names(result)
-
-        # Results stored here
-        top5 = list()
-
-        n=0
-        while n < 5:
-            url = transform_url(result_urls[i])
-            url = url[:url.find("#")]
-
-            if url not in top5:
-                top5.append(url)
-        
-        for url in top5:
-            print(url)
-        print()
+            ''' Printing the results '''
+            result_urls = get_url_names(result)
 
 
     
