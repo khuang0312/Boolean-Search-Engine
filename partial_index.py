@@ -97,7 +97,7 @@ def simhash(tokens : {str:[int]}):
         curr_bit = 0 # keep track of which digit to modify
         
         for hash_byte in t_hash:
-             bits = [int(i) for i in "{0:08b}".format(hash_byte)]
+            bits = [int(i) for i in "{0:08b}".format(hash_byte)]
             for bit in bits:
                 if bit == 1:
                     b_vector[curr_bit] += len(tokens[t])
@@ -105,16 +105,16 @@ def simhash(tokens : {str:[int]}):
                     b_vector[curr_bit] -= len(tokens[t])
                 curr_bit += 1
 
-    return "".join(["1" for i in b_vector if i > 0 else "0"]
+    return "".join(["1" if i > 0 else "0" for i in b_vector]) 
 
 def similarity_check(domain_hashes:{str}, simhash:str):
     '''Uses the simhash of a page and compares it to all hashes in 
         a set of simhashes
     '''
-    for hash in domain_hashes:
+    for h in domain_hashes:
         matching_bits = 0
         for j in range(len(simhash)):
-            if simhash[j] == hash[j]:
+            if simhash[j] == h[j]:
                 matching_bits += 1
         if matching_bits / 256 > .90:
             return True 
@@ -123,27 +123,27 @@ def similarity_check(domain_hashes:{str}, simhash:str):
 
 if __name__ == "__main__":
 
-    # parse.cleanup_files()
+    parse.cleanup_files()
     
     BATCH_SIZE = 10_486_240 # in bytes 
     batch_number = 1
-    doc_id = 0
-    
 
     index_index = dict() # key = token, value = file seeking position
     index = SortedDict() # dict - SortedDict()
+    unique_tokens = 0
+    
+    # the documents that do get parsed
+    # not removed by similarity check
+    doc_id = 0
     docs  = []
     urls = []
 
     for domain, dir, pages in walk("DEV/"):
         domain_hashes = set()     
-        print(len(domain_hashes))
         for page in pages:
             # if batch_number == 3: # needed to stop loop prematurely to test 
             #    print("Did enough testing")
             #    break
-            print("Parsing doc {}, Unique Tokens: {}, Size of Index {}".format(
-                doc_id, unique_tokens, getsizeof(index)))
             
             doc_path = domain + "/" + page
             page_data = page_text(doc_path) 
@@ -161,14 +161,19 @@ if __name__ == "__main__":
 
             # simhash page... if simhash is similar to pages in domain
             page_hash = simhash(tokens)
-            if similarity_check(page_hash, domain_hashes):
+            if similarity_check(domain_hashes, page_hash):
+                print("Document similar to another document in domain!")
                 continue
             
             domain_hashes.add(page_hash)
 
+            print("Parsing doc {}, Unique Tokens: {}, Size of Index {}".format(
+                doc_id, unique_tokens, getsizeof(index)))
+            
             for t in tokens:
                 if t not in index:
                     index[t] = []
+                    unique_tokens += 1
                 score = 0
                 if t in h1_tokens:
                     score += 1
@@ -188,7 +193,6 @@ if __name__ == "__main__":
             docs.append(page)
             urls.append(page_data[1])
             doc_id += 1
-            
             if getsizeof(index) > BATCH_SIZE:
                 # write to file
                 index_filename = "index" + str(batch_number) + ".txt"
@@ -202,7 +206,7 @@ if __name__ == "__main__":
 
         # if batch_number == 3: # needed to stop loop prematurely to test 
         #    break
-
+        
     if getsizeof(index) > 0: # writes remaining file index
         index_filename = "index" + str(batch_number) + ".txt"
         print("Writing last index to disk")
