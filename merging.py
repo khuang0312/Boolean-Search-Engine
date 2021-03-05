@@ -4,7 +4,7 @@ from sortedcontainers import SortedDict
 from math import log10
 
 
-def append_index(index : 'SortedDict', index_filename : str):
+def append_index(index : dict, index_filename : str):
     ''' appends index to merged_index.txt
         Keeps track of position
     '''
@@ -119,11 +119,13 @@ if __name__ == "__main__":
     index_index = SortedDict()
     index_info = load_bin("index_info.bin")
     N = index_info["doc_count"]             # N is the amount of words obtained...
+    
 
     remove_file("merged_index.txt")
     remove_file("index_index.bin")
     
     INDEX_COUNT = count_partial_indexes()
+    INDEX_COUNT = 1
 
     indexes = open_files(INDEX_COUNT)
 

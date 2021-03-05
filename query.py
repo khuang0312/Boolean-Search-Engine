@@ -3,9 +3,8 @@ import pickle
 import re
 from nltk.stem import PorterStemmer
 import parse
-from timer import Timer, to_milliseconds
-import math
-import time
+from math import log10, sqrt
+from time import perf_counter
 from collections import OrderedDict
 
 '''
@@ -57,25 +56,23 @@ def get_doc_posting(token : str, docID : int) -> list:
 def get_doc_length(weights:[int]) -> float:
     ''' Given the list of wt values (query or doc), calculate the normalized value '''
     val = 0
-    for n in weight:
+    for n in weights:
         val += n ** 2
-    doc_length = math.sqrt(val)
+    doc_length = sqrt(val)
     return doc_length
 
-def get_query_tfidf_vectors(query : str) -> dict:
-    ''' Calcuates ALL tf-idf vectors for the given query.
+def get_query_tfidf_vectors(query : [str]) -> dict:
+    ''' Calcuates ALL tf-idf vectors for the given query token.
         Includes normalize value
         key = token | value = tf-idf vector
     '''
-    global DOC_COUNT
-    ps = PorterStemmer()
-    tokens = [ps.stem(token) for token in query.split()]
+    # global DOC_COUNT
     result = OrderedDict()
     weights = list()
     word_freq = computeWordFrequency(tokens)
 
-    ''' Calculate all the vectors (except for normalized value) '''
-    for token in tokens:
+    ''' Calculate the vector (except for normalized value) '''
+    for token in query:
         df = len(get_postings(token))
         tf_wt = 1+log10(word_freq[token])
         idf = log10(DOC_COUNT / df)
@@ -115,8 +112,8 @@ def get_doc_vectors(query_tokens : [str]) -> dict:
         Calculate doc vectors for cosin similarity scoring
     '''
     doc_vectors = dict()
-    for token in tokens:
-        postings_list = get_posting(token)
+    for token in query_tokens:
+        postings_list = get_postings(token)
         for doc in postings_list:
             docID = doc[0]
             vector = get_document_tfidf_vector(token, docID)
@@ -149,13 +146,16 @@ def normalize_doc_wts(doc_vectors : dict):
 def process_query(query : str) -> dict:
     ''' Returns a dict of docIDs and their scores
     '''
+    start = perf_counter()
+
+    ''' stem the tokens '''
+    ps = PorterStemmer()
+    tokens = [ps.stem(token) for token in query.split()]
 
     ''' calculate query vector '''
     query_tfidf_vector = get_query_tfidf_vectors(query) # dict of vectors for each token in query
     
-    ''' stem the tokens '''
-    ps = PorterStemmer()
-    tokens = [ps.stem(token) for token in query.split()]
+   
 
     ''' calculate doc vectors '''
     # docID : {
@@ -177,10 +177,10 @@ def process_query(query : str) -> dict:
             if token in doc_vector[docID]:                
                 result += doc_vector[docID][token]["normalize"] * query_tfidf_vector[token]["normalize"]
     scores = sorted(scores.items(), key=lambda x:x[1])
+   
+    print("Search time elapsed: {} ms".format( (perf_counter()) - start * 1000))
     return scores
     
-
-
 # def get_url_names(postings : [(int, int)]):
 #     ''' Given the list of postings, return a list of the 
 #         associated URLs
@@ -201,7 +201,6 @@ def get_url_names(scores : dict) -> [str]:
     result = list()
     for docID in scores:
         result.append(url[ID])
-
     return result
 
 
@@ -226,23 +225,23 @@ if __name__ == "__main__":
     DOC_COUNT = 55_393
 
     ''' Load in the goods '''
-    # print("Loading index into memory...")
+    print("Loading index into memory...")
 
     url = parse.load_bin("testing/url.bin")
     merged_index = parse.load_bin("testing/index.bin") # temp, replace with txt index later
     
-    # print("Done.")
+    print("Done.")
 
     ''' Getting query input '''
     
     while (1):
         query = input("Input query: ")
-        start = time.time()
+        
 
         result = process_query(query)
 
-        end = time.time()
-        print("Search time elapsed: {} s".format(end - start))
+        
+        
 
         ''' Printing the results '''
         result_urls = get_url_names(result)

@@ -9,6 +9,9 @@ from sys import argv, getsizeof
 from sortedcontainers import SortedDict
 import parse
 
+
+
+
 '''
 Dictionary of tokens mapped to list of lists [doc_id, tf-idf score, positions in doc]
 '''
@@ -24,6 +27,23 @@ def page_text(filepath: str) -> (str, str):
         page_text = soup.get_text()
         url = html_doc["url"]
     return (page_text, url)
+
+def get_words_in_tag_type(filepath: str, tag_name: str) -> [str]:
+    '''return tokens inside all occurences of a specific tag
+    '''
+    tokens = []
+    with open(filepath) as f:
+        html_doc = json.load(f)
+        soup = BeautifulSoup(html_doc['content'], "html.parser")
+        tags = soup.find_all(tag_name) # Tag objects...
+
+        for tag in tags:
+            # must cast tag to String to soup it
+            tag_soup = BeautifulSoup(str(tag), 'html.parser')
+            tag_souped = eval("tag_soup." + tag_name, globals(), locals())
+            tokens += get_words(str(tag_souped.string)).keys() # tag.string returns NavigableString
+
+    return tokens
 
 def get_words(text : str) -> {str : [int]}:
     '''Uses very simplified rules to get words from the file
@@ -69,7 +89,8 @@ def index_info(unique_tokens:int=0, doc_count:int=0, partial_indexes:int=0):
     
 
 if __name__ == "__main__":
-    parse.cleanup_files()
+    # DEBUG
+    # parse.cleanup_files()
     
     BATCH_SIZE = 10_486_240 # in bytes 
     batch_number = 1
@@ -83,9 +104,9 @@ if __name__ == "__main__":
 
     for domain, dir, pages in walk("DEV/"):
         for page in pages:
-            # if batch_number == 3: # needed to stop loop prematurely to test 
-            #    print("Did enough testing")
-            #    break
+            if batch_number == 3: # needed to stop loop prematurely to test 
+               print("Did enough testing")
+               break
             print("Parsing doc {}, Unique Tokens: {}, Size of Index {}".format(
                 doc_id, unique_tokens, getsizeof(index)))
             
@@ -95,13 +116,30 @@ if __name__ == "__main__":
             docs.append(page)
             urls.append(page_data[1])
 
+            # precompute list of "special tokens"
+            h1_tokens = get_words_in_tag_type(doc_path, "h1") # 1
+            h2_tokens = get_words_in_tag_type(doc_path, "h2") # .8
+            h3_tokens = get_words_in_tag_type(doc_path, "h3") # .6
+            strong_tokens = get_words_in_tag_type(doc_path, "strong") # .4
+            bold_tokens = get_words_in_tag_type(doc_path, "b") # .3
+            
             tokens = get_words(page_data[0])
-
             for t in tokens:
                 if t not in index:
                     index[t] = []
                     unique_tokens += 1 # might have to remove eventually
-                index[t].append([doc_id, 0] + tokens[t]) # the 0 will be where the tf-idf score goes... 
+                score = 0
+                if token in h1_tokens:
+                    score += 1
+                if token in h2_tokens:
+                    score += .8
+                if token in h3_tokens:
+                    score += .6
+                if token in strong_tokens:
+                    score += .4
+                if token in bold_tokens:
+                    score += .3
+                index[t].append([doc_id, score] + tokens[t]) # the score will be where the tf-idf score goes... 
             doc_id += 1
             
             if getsizeof(index) > BATCH_SIZE:
@@ -115,8 +153,8 @@ if __name__ == "__main__":
         
         
 
-        # if batch_number == 3: # needed to stop loop prematurely to test 
-        #    break
+        if batch_number == 3: # needed to stop loop prematurely to test 
+           break
 
     if getsizeof(index) > 0: # writes remaining file index
         index_filename = "index" + str(batch_number) + ".txt"
