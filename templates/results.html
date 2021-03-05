@@ -1,0 +1,33 @@
+<DOCTYPE html>
+    <html lang="en">
+        <head>
+            <title>CS 121: Search Engine Results</title>
+            <meta charset="UTF-8">
+            <script src="script.js"></script>
+            <style>
+                i {
+                    color : rgb(0, 255, 0)
+                };
+            </style>
+        </head>
+        <body>
+            <h1>CS 121: Search Engine</h1>
+
+            <form action="http://127.0.0.1:5000/" method="POST">
+                <label for="query">Search:</label>
+                <input name="query" type="search" autofocus autocomplete="on" value={{ query }}>
+                <input type="submit">
+            </form>
+    
+            
+            <div id="results">
+                <h2 id="inputted_query">Results for <i>'{{ query }}':</i></h2>
+                <div id="results_list">
+                    <li>Will stick something here...</li>
+                </div>
+            </div>
+    
+            
+        </body> 
+    
+    </html>

@@ -39,8 +39,10 @@ def get_words_in_tag_type(filepath: str, tag_name: str) -> [str]:
 if __name__ == "__main__":
     
     url = "https://aiclub.ics.uci.edu/"
-    
-    soup = 
+    res = requests.get(url)
+    soup = BeautifulSoup(res.content, "html.parser")
+    anchor = soup.find_all("a")
+    print(anchor)
     # anchor_index = dict() # docID : position
     # index = SortedDict() # docID : anchor text
 

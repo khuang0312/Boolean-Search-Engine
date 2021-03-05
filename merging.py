@@ -125,7 +125,6 @@ if __name__ == "__main__":
     remove_file("index_index.bin")
     
     INDEX_COUNT = count_partial_indexes()
-    INDEX_COUNT = 1
 
     indexes = open_files(INDEX_COUNT)
 

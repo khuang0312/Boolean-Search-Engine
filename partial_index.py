@@ -13,7 +13,7 @@ import parse
 
 
 '''
-Dictionary of tokens mapped to list of lists [doc_id, tf-idf score, positions in doc]
+Dictionary of tokens mapped to list of lists [doc_id, tf-idf score, important text score, positions in doc]
 '''
 def page_text(filepath: str) -> (str, str):
     ''' Returns the page text and URL from the given JSON filename,
@@ -89,6 +89,7 @@ def index_info(unique_tokens:int=0, doc_count:int=0, partial_indexes:int=0):
     
 
 if __name__ == "__main__":
+
     parse.cleanup_files()
     
     BATCH_SIZE = 10_486_240 # in bytes 
@@ -103,9 +104,9 @@ if __name__ == "__main__":
 
     for domain, dir, pages in walk("DEV/"):
         for page in pages:
-            if batch_number == 3: # needed to stop loop prematurely to test 
-               print("Did enough testing")
-               break
+            # if batch_number == 3: # needed to stop loop prematurely to test 
+            #    print("Did enough testing")
+            #    break
             print("Parsing doc {}, Unique Tokens: {}, Size of Index {}".format(
                 doc_id, unique_tokens, getsizeof(index)))
             
@@ -138,7 +139,7 @@ if __name__ == "__main__":
                     score += .4
                 if t in bold_tokens:
                     score += .3
-                index[t].append([doc_id, score] + tokens[t]) # the score will be where the tf-idf score goes... 
+                index[t].append([doc_id, 0, score] + tokens[t]) # the score will be where the tf-idf score goes... 
             doc_id += 1
             
             if getsizeof(index) > BATCH_SIZE:
@@ -152,8 +153,8 @@ if __name__ == "__main__":
         
         
 
-        if batch_number == 3: # needed to stop loop prematurely to test 
-           break
+        # if batch_number == 3: # needed to stop loop prematurely to test 
+        #    break
 
     if getsizeof(index) > 0: # writes remaining file index
         index_filename = "index" + str(batch_number) + ".txt"

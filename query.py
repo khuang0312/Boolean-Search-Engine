@@ -219,19 +219,25 @@ def is_valid(url : str) -> str:
             return False
     return True
 
-def get_query_postings(query_str : str) -> dict:
-    ''' Returns dict mapping stemmed token to posting 
-        Appends stemmed tokens to QUERY_LIST
+def get_query_terms(query_str : str) -> [str]:
+    '''Returns a list of stemmed tokens...
     '''
-    global QUERY_LIST
     ps = PorterStemmer()
-    result = dict()
-    for token in query.split():
-        token = ps.stem(token)
-        QUERY_LIST.append(token)
+    return [ps.stem(token) for token in query_str.split()]:
+
+def get_query_postings(query_list : [str]) -> dict:
+    ''' Returns dict mapping stemmed token to posting 
+        
+    '''
+    postings = dict()
+    for token in query_list:
         if token not in result:
-            result[token] = get_postings(token)
-    return result
+            postings[token] = get_postings(token)
+    return postings
+
+def query_results(query: string):
+    
+    
 if __name__ == "__main__":
 
     # DOC_COUNT = 55_393
@@ -252,16 +258,17 @@ if __name__ == "__main__":
         
         query = input("Input query: ")
         
-        QUERY_LIST = list()
-        print("QUERY_LIST: {}".format(QUERY_LIST))
-        QUERY_POSTINGS = get_query_postings(query)
-        print("QUERY_LIST: {}".format(QUERY_LIST))
-        input()
-        result = process_query(QUERY_LIST)
+        QUERY_TERMS = get_query_terms(query)
+        QUERY_POSTINGS = get_query_postings(query_list)
+
+        result = process_query(QUERY_TERMS)
 
         ''' Printing the results '''
         result_urls = get_url_names(result)
+
+        # Results stored here
         top5 = list()
+
         n=0
         while n < 5:
             url = transform_url(result_urls[i])
