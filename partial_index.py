@@ -162,7 +162,7 @@ if __name__ == "__main__":
             # simhash page... if simhash is similar to pages in domain
             page_hash = simhash(tokens)
             if similarity_check(domain_hashes, page_hash):
-                print("Document similar to another document in domain!")
+                print("Document similar to another document in domain \'{}\'!".format(domain))
                 continue
             
             domain_hashes.add(page_hash)
