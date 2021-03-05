@@ -14,7 +14,8 @@ For example, typing the word "acm" will give pages containing the word "acm".
     - NLTK 3.5 - needed for PorterStemmer
     - BeautifulSoup 4.9.x - needed for BeautifulSoup
     - sortedcontainers - needed for SortedDict
-    - This can be done with the command: ```pip install --user nltk bs4 sortedcontainers```
+    - Flask - needed for the Web GUI
+    - This can be done with the command: ```pip install --user nltk bs4 sortedcontainers flask```
     - Make sure you have the "developer.zip" folder as well.
 
 2. Extract the developer.zip folder so that the resulting "DEV" folder

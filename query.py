@@ -35,23 +35,19 @@ def computeWordFrequency(tokens:[str]) -> dict:
         result[token] = result.get(token,0) + 1
     return result
 
-def get_postings(token : str) -> [tuple]:
+def get_postings(token : str) -> [list]:
     ''' Returns the postings of the given token 
-        CURRENTLY ONLY WORKS FOR IN MEMORY INDEX
     '''
     try:
         global merged_index
-        return  merged_index[token]
+        seek = int(index_index[token])
+        merged_index.seek(seek)
+        # werner [[30886, 6.258362786994808, 375, 4964, 5000], [30936, 4.236864622317388, 526]]
+        line = merged_index.readline()
+        print(line)
+        return eval(line.split()[1])
     except KeyError:
         print("Token \'{}\' not found!".format(token))
-
-def get_doc_posting(token : str, docID : int) -> list:
-    ''' Get the posting for the given token and docID
-    '''
-    for posting in get_postings(token):
-        if posting[0] == docID:
-            return posting
-    return []
 
 def get_doc_length(weights:[int]) -> float:
     ''' Given the list of wt values (query or doc), calculate the normalized value '''
@@ -66,23 +62,24 @@ def get_query_tfidf_vectors(query : [str]) -> dict:
         Includes normalize value
         key = token | value = tf-idf vector
     '''
-    # global DOC_COUNT
+    global QUERY_POSTINGS
     result = OrderedDict()
     weights = list()
-    word_freq = computeWordFrequency(tokens)
+    word_freq = computeWordFrequency(query)
 
     ''' Calculate the vector (except for normalized value) '''
     for token in query:
-        df = len(get_postings(token))
-        tf_wt = 1+log10(word_freq[token])
-        idf = log10(DOC_COUNT / df)
-        wt = tf_wt * idf
-        tfidf_vector = {
-            "wt" : wt,
-            "normalize" : 0,
-        }
-        weights.append(wt)
-        result[token] = tfidf_vector
+        if token not in result:
+            df = len(QUERY_POSTINGS[token])
+            tf_wt = 1+log10(word_freq[token])
+            idf = log10(55_393 / df)
+            wt = tf_wt * idf
+            tfidf_vector = {
+                "wt" : wt,
+                "normalize" : 0,
+            }
+            weights.append(wt)
+            result[token] = tfidf_vector
 
     ''' Calculate normalized value '''
     doc_length = get_doc_length(weights)
@@ -90,6 +87,15 @@ def get_query_tfidf_vectors(query : [str]) -> dict:
         result[token]["normalize"] = result[token]["wt"] / doc_length
 
     return result
+
+def get_doc_posting(token : str, docID : int) -> list:
+    ''' Get the posting for the given token and docID
+    '''
+    global QUERY_POSTINGS
+    for posting in QUERY_POSTINGS[token]:
+        if posting[0] == docID:
+            return posting
+    return []
 
 def get_document_tfidf_vector(token : str, docID : int) -> dict:
     ''' Calculates the weighted tf-idf vector for the given token.
@@ -132,8 +138,6 @@ def normalize_doc_wts(doc_vectors : dict):
     '''
     weights = list()
     weights = [doc_vectors[token]["wt"] for token in doc_vectors]
-    # for token in doc_vectors:
-    #     weights.append(doc_vectors[token]["wt"])
     
     doc_length = get_doc_length(weights)
 
@@ -143,20 +147,15 @@ def normalize_doc_wts(doc_vectors : dict):
     return doc_vectors
 
 
-def process_query(query : str) -> dict:
-    ''' Returns a dict of docIDs and their scores
+def process_query(query : [str]) -> dict:
+    ''' Returns a dict of docIDs and their scores. Query tokens should already be stemmed
     '''
     start = perf_counter()
 
-    ''' stem the tokens '''
-    ps = PorterStemmer()
-    tokens = [ps.stem(token) for token in query.split()]
-
     ''' calculate query vector '''
-    query_tfidf_vector = get_query_tfidf_vectors(query) # dict of vectors for each token in query
+    # dict of vectors for each unique token in query
+    query_tfidf_vector = get_query_tfidf_vectors(query) 
     
-   
-
     ''' calculate doc vectors '''
     # docID : {
     #     "token1" : {vector dict},
@@ -220,28 +219,45 @@ def is_valid(url : str) -> str:
             return False
     return True
 
+def get_query_postings(query_str : str) -> dict:
+    ''' Returns dict mapping stemmed token to posting 
+        Appends stemmed tokens to QUERY_LIST
+    '''
+    global QUERY_LIST
+    ps = PorterStemmer()
+    result = dict()
+    for token in query.split():
+        token = ps.stem(token)
+        QUERY_LIST.append(token)
+        if token not in result:
+            result[token] = get_postings(token)
+    return result
 if __name__ == "__main__":
 
-    DOC_COUNT = 55_393
+    # DOC_COUNT = 55_393
 
     ''' Load in the goods '''
-    print("Loading index into memory...")
+    print("Loading search engine...")
 
-    url = parse.load_bin("testing/url.bin")
-    merged_index = parse.load_bin("testing/index.bin") # temp, replace with txt index later
+    url = parse.load_bin("url.bin")
+    doc = parse.load_bin("doc.bin")
+    index_index = parse.load_bin("index_index.bin")
+    merged_index = open("merged_index.txt", "r")
     
     print("Done.")
 
     ''' Getting query input '''
     
     while (1):
+        
         query = input("Input query: ")
         
-
-        result = process_query(query)
-
-        
-        
+        QUERY_LIST = list()
+        print("QUERY_LIST: {}".format(QUERY_LIST))
+        QUERY_POSTINGS = get_query_postings(query)
+        print("QUERY_LIST: {}".format(QUERY_LIST))
+        input()
+        result = process_query(QUERY_LIST)
 
         ''' Printing the results '''
         result_urls = get_url_names(result)

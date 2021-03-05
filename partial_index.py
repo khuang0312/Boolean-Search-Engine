@@ -89,8 +89,7 @@ def index_info(unique_tokens:int=0, doc_count:int=0, partial_indexes:int=0):
     
 
 if __name__ == "__main__":
-    # DEBUG
-    # parse.cleanup_files()
+    parse.cleanup_files()
     
     BATCH_SIZE = 10_486_240 # in bytes 
     batch_number = 1
@@ -129,15 +128,15 @@ if __name__ == "__main__":
                     index[t] = []
                     unique_tokens += 1 # might have to remove eventually
                 score = 0
-                if token in h1_tokens:
+                if t in h1_tokens:
                     score += 1
-                if token in h2_tokens:
+                if t in h2_tokens:
                     score += .8
-                if token in h3_tokens:
+                if t in h3_tokens:
                     score += .6
-                if token in strong_tokens:
+                if t in strong_tokens:
                     score += .4
-                if token in bold_tokens:
+                if t in bold_tokens:
                     score += .3
                 index[t].append([doc_id, score] + tokens[t]) # the score will be where the tf-idf score goes... 
             doc_id += 1
