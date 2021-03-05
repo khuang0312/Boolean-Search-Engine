@@ -116,11 +116,11 @@ def get_doc_vectors(query_tokens : [str]) -> dict:
     ''' Given the list of stemmed query tokens,
         Calculate doc vectors for cosin similarity scoring
     '''
+    global QUERY_POSTINGS
     doc_vectors = dict()
     for token in query_tokens:
-        postings_list = get_postings(token)
-        for doc in postings_list:
-            docID = doc[0]
+        for posting in QUERY_POSTINGS[token]:
+            docID = posting[0]
             vector = get_document_tfidf_vector(token, docID)
             if docID not in doc_vectors:
                 doc_vectors[docID] = {token : vector}
@@ -179,20 +179,6 @@ def process_query(query : [str]) -> dict:
     print("Search time elapsed: {} ms".format( (perf_counter()) - start * 1000))
     return scores
     
-# def get_url_names(postings : [(int, int)]):
-#     ''' Given the list of postings, return a list of the 
-#         associated URLs
-#     '''
-#     global url
-#     result = list()
-#     # print("posting: {}".format(postings))
-#     for posting in postings:
-#         ID = posting[0]
-#         print(ID)
-#         result.append(url[ID])
-
-#     return result
-
 def get_url_names(scores : dict) -> [str]:
     ''' Given the results {docID:scores} dict, return a list of corresponding URLs '''
     global url
@@ -233,8 +219,6 @@ def get_query_postings(query_list : [str]) -> dict:
         if token not in result:
             postings[token] = get_postings(token)
     return postings
-
-
     
     
 if __name__ == "__main__":
@@ -257,7 +241,7 @@ if __name__ == "__main__":
                 break
             
             QUERY_TERMS = get_query_terms(query)
-            QUERY_POSTINGS = get_query_postings(query_list)
+            QUERY_POSTINGS = get_query_postings(QUERY_TERMS)
 
             result = process_query(QUERY_TERMS)
 

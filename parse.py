@@ -15,7 +15,7 @@ def count_partial_indexes():
     '''
     count = 0 
     for f in listdir("."):
-        if f.startswith("index"):
+        if f.startswith("partial_index_file"):
             count += 1
     return count
             

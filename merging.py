@@ -22,7 +22,8 @@ def process_line(line : str) -> (str, [(int)]):
 
         Returns a tuple of the token and a posting if the line is valid
     '''
-    if line.isspace() or line == "":
+    if line.isspace() or line == "" or line == "\n":
+        print("wtf")
         return None
 
     line = line.strip()
@@ -57,7 +58,7 @@ def process_index_segment(index_arr : list, positions) -> [int]:
     min_word = find_min_word(lines)
     for j in range(len(lines)):
         # empty or whitespace-only line means we hit end of file
-        if lines[j] == None:
+        if lines[j] in ["", None, "\n"]:
             positions[j] = -1
         else:
             token, postings = lines[j]
@@ -94,7 +95,7 @@ def open_files(INDEX_COUNT=1) -> "[File]":
     indexes = []
     for i in range(0,INDEX_COUNT):
         try:
-            index_path = "index" + str(i+1) + ".txt"
+            index_path = "partial_index_file" + str(i) + ".txt"
             print(index_path)
             indexes.append(open(index_path, "r"))
         except FileNotFoundError:
@@ -125,9 +126,11 @@ if __name__ == "__main__":
     remove_file("index_index.bin")
     
     INDEX_COUNT = count_partial_indexes()
+    print("INDEX COUNT {}".format(INDEX_COUNT))
+    
 
     indexes = open_files(INDEX_COUNT)
-
+    
     # recurse through all files to merge them
     positions = [0 for i in range(INDEX_COUNT)]
     while not no_more_lines(positions):

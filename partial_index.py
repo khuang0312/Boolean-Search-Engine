@@ -131,6 +131,7 @@ if __name__ == "__main__":
     index_index = dict() # key = token, value = file seeking position
     index = SortedDict() # dict - SortedDict()
     unique_tokens = 0
+    docs_removed = 0
     
     # the documents that do get parsed
     # not removed by similarity check
@@ -162,7 +163,8 @@ if __name__ == "__main__":
             # simhash page... if simhash is similar to pages in domain
             page_hash = simhash(tokens)
             if similarity_check(domain_hashes, page_hash):
-                print("Document similar to another document in domain \'{}\'!".format(domain))
+                docs_removed += 1
+                print("Current doc similar to doc in domain \'{}\'! Total removed: {}".format(domain, docs_removed))                
                 continue
             
             domain_hashes.add(page_hash)
@@ -195,7 +197,7 @@ if __name__ == "__main__":
             doc_id += 1
             if getsizeof(index) > BATCH_SIZE:
                 # write to file
-                index_filename = "index" + str(batch_number) + ".txt"
+                index_filename = "partial_index" + str(batch_number - 1) + ".txt"
                 print("Writing {} to disk...".format(index_filename))
                 write_index(index, index_filename)
                 # start empty current index, start a new one
@@ -208,7 +210,7 @@ if __name__ == "__main__":
         #    break
         
     if getsizeof(index) > 0: # writes remaining file index
-        index_filename = "index" + str(batch_number) + ".txt"
+        index_filename = "index" + str(batch_number - 1) + ".txt"
         print("Writing last index to disk")
         print("Writing {} to disk...".format(index_filename))
         write_index(index, index_filename)
