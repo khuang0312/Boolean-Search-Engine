@@ -1,4 +1,5 @@
 from os import remove, listdir, scandir
+from urllib.parse import urldefrag
 import pickle
 
 def cleanup_files():
@@ -75,5 +76,8 @@ def contains_query(query : str, word_dict : dict) -> bool :
         if word not in word_dict: 
             return False
     return True
+
+def defrag_url(url_string : str) -> str:
+    return urldefrag(url_string).url
 
 

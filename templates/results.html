@@ -15,13 +15,13 @@
 
             <form action="http://127.0.0.1:5000/" method="POST">
                 <label for="query">Search:</label>
-                <input name="query" type="search" autofocus autocomplete="on" value={{ query }}>
+                <input name="query" type="search" autofocus autocomplete="on" value={{ query_string }}>
                 <input type="submit">
             </form>
     
             
             <div id="results">
-                <h2 id="inputted_query">Results for <i>'{{ query }}':</i></h2>
+                <h2 id="inputted_query">Displaying {{ k }} results for <i>'{{ query_string }}':</i></h2>
                 <ol>
                     {{ results_string }}
                 <ol>
