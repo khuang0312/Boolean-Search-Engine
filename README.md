@@ -22,11 +22,23 @@ For example, typing the word "acm" will give pages containing the word "acm".
 is in the root directory with the Python code files: 
 partial\_index.py, merging.py, and query.py 
 
-3. Run partial\_index.py. This file creates the partial index files.
-Each partial index file is labeled "index\{number\}.txt".
+3. Run partial\_index.py with the command. ```python3 ./partial_index.py```
+This file creates the partial index files. Each partial index file is 
+labeled "index\{number\}.txt". Make sure to keep this file running until completion.
 
-4. Run merging.py. This file will merge the partial index files into 
-one complete merged index.
+4. Run merging.py. ```python3 ./merging.py``` 
+This file will merge the partial index files into one complete 
+merged index. Make sure to keep this file running until completion.
 
-5. Run query.py. You'll be prompted for input. Type in your search terms
-and await the results!
+5. There are two ways of running the program. The first method is 
+an command line application. The second one is a website developed using Flask.
+   1. Run query.py. ```python3 ./query.py``` You'll be prompted for input. Type in your search terms
+and await the results! Type ":q" once you're done to end the program.
+   2. Make sure that you can see the desktop. The website can't run in an headless environment.
+      - Type the following commands in the terminal. This allows Flask to know where to run the program.
+      ```
+      export FLASK_APP=searchpage.py
+      flask run
+      ```
+     - In your browser, go to "http://127.0.0.1:5000/". You'll see the site!
+

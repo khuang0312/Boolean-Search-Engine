@@ -177,7 +177,7 @@ def get_k_results(result_urls:[str], k:int) -> [str]:
             k_results[i] = 0
         
     
-    return k_results.keys()
+    return list(k_results.keys())
         
     
 if __name__ == "__main__":
@@ -196,13 +196,14 @@ if __name__ == "__main__":
     with open("merged_index.txt", "r") as merged_index:
         print("Done.")
         ''' Getting query input '''
-
-       
+ 
         while True:
-            query = input("Input query: ")
+            query = input("Input query. Type ':q' to quit: ")
             if query == ":q":
                 break
-            
+            if re.search("[^0-9a-zA-Z\s]", query) or query == "":
+                print("Alphanumeric input only!")
+                continue
             
             QUERY_TERMS = get_query_terms(query, stopwords)
 
@@ -211,12 +212,17 @@ if __name__ == "__main__":
 
             # # Printing the results
             result_urls = get_url_names(result)
-            result_set = get_k_results(result_urls, int(k))
+            
+            print("Results obtained: {}".format(len(set(result_urls))))
+            
 
-            print("Results obtained: {}".format(len(result_set)))
-            k = input("How many results to show? ")
-            for i in result_set:
-                print(i)
+            k = "a"
+            while (not k.isdigit()):
+                k = input("How many results to show? ")
+
+            result_set = get_k_results(result_urls, int(k))
+            for i in range(len(result_set)):
+                print("{:10d}.".format(i+1), result_set[i])
             
         
 
