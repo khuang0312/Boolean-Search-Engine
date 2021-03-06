@@ -116,7 +116,7 @@ def similarity_check(domain_hashes:{str}, simhash:str):
         for j in range(len(simhash)):
             if simhash[j] == h[j]:
                 matching_bits += 1
-        if matching_bits / 256 > .90:
+        if matching_bits / 256 > .95:
             return True 
     return False
     
