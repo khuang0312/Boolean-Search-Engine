@@ -40,5 +40,5 @@ and await the results! Type ":q" once you're done to end the program.
       export FLASK_APP=searchpage.py
       flask run
       ```
-     - In your browser, go to "http://127.0.0.1:5000/". You'll see the site!
+      - In your browser, go to "http://127.0.0.1:5000/". You'll see the site!
 
