@@ -165,10 +165,19 @@ def load_stopwords():
 def get_k_results(result_urls:[str], k:int) -> [str]:
     if k > len(result_urls):
         k = len(result_urls)
-    if k < 0:
+    elif k < 0:
         k = 0
-            
-    return result_urls[:k]
+
+    k_results = OrderedDict()
+
+    for i in result_urls:
+        if len(k_results) == k:
+            break
+        if i not in k_results:
+            k_results[i] = 0
+        
+    
+    return k_results.keys()
         
     
 if __name__ == "__main__":
@@ -202,10 +211,11 @@ if __name__ == "__main__":
 
             # # Printing the results
             result_urls = get_url_names(result)
+            result_set = get_k_results(result_urls, int(k))
 
-            print("Results obtained: {}".format(len(result_urls)))
+            print("Results obtained: {}".format(len(result_set)))
             k = input("How many results to show? ")
-            for i in get_k_results(result_urls, int(k)):
+            for i in result_set:
                 print(i)
             
         
