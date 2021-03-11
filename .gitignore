@@ -1,4 +1,6 @@
 DEV/*
+testing/*
 *.zip
 *.json
 *.bin
+*.txt

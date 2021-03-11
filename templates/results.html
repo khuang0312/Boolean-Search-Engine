@@ -1,0 +1,40 @@
+<DOCTYPE html>
+    <html lang="en">
+        <head>
+            <title>CS 121: Search Engine Results</title>
+            <meta charset="UTF-8">
+            <style>
+                i {
+                    color : rgb(0, 255, 0)
+                };
+            </style>
+        </head>
+        <body>
+            <h1>CS 121: Search Engine</h1>
+
+            <form action="http://127.0.0.1:5000/" method="POST">
+                <label for="query">Search:</label>
+                <input name="query" type="search" autofocus autocomplete="on">
+                <label for="max_results">K Results Desired:</label>
+                <input name="max_results" type="number" min="1">
+                <input type="submit">
+            </form>
+    
+            
+            
+            <h2 id="inputted_query">Displaying {{ k }} results for <i>'{{ query_string }}'</i></h2>
+            <h3>Time searched: {{ query_time }}ms</h3>
+            <ol id="query_results_list">
+                {{ results_string }}
+            </ol>
+            
+        
+            
+            
+                
+               
+            
+            
+        </body> 
+    
+    </html>

@@ -1,123 +1,83 @@
-# This module is dedicated to the processing of webpages
-# Webpages in this context are the JSON files in the "DEV/" folder
+from os import remove, listdir, scandir
+from urllib.parse import urldefrag
+import pickle
 
-from bs4 import BeautifulSoup
-<<<<<<< HEAD
-from nltk.stem import PorterStemmer
-=======
->>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
-import json
-import re
-
-def page_text(filepath : str) -> str:
-    '''Returns the readable text of a webpage 
-
-       Warning: the string is not printable because of Unicode characters
-       within it...
-
-       We need to also consider bolding (b, strong) and headings (h1, h2, h3)
+def cleanup_files():
+    '''Deletes all files created by the code...
     '''
-    page_text = ""
+    for f in listdir("."):
+        for i in ["index", "doc", "url"]:
+            if f.startswith(i):
+                print("Removing file {}".format(f))
+                remove_file(f)
 
-    with open(filepath) as f:
-        html_doc = json.load(f)
-        soup = BeautifulSoup(html_doc['content'], "html.parser")
-        page_text = soup.get_text()
-
-    return page_text
-
-def get_words(text : str) -> (int, {str : int}):
-    '''Uses very simplified rules to get words from the file
-        Only lowercase alphanumeric characters
-
-        According to general specifications, we use
-        all alphanumeric sequences
-
-        We consider stop words...
+def count_partial_indexes():
+    '''Counts partial indexes in the file...
     '''
-    words_found = 0
-    word_frequencies = {}
-<<<<<<< HEAD
-    ps = PorterStemmer()
-    for word in re.finditer(r'([a-zA-Z0-9]+)', text):
-        try:
-            word = ps.stem(word.group(0).lower())
-        except IndexError:
-            print("Something happened with term {}".format(word))
-        else:
-            if word not in word_frequencies:
-                words_found += 1
-                word_frequencies[word] = 1
-            else:
-                word_frequencies[word] += 1
-=======
-    
-    for word in re.finditer(r'([a-zA-Z0-9]+)', text):
-        word = word.group(0).lower()
-        if word not in word_frequencies:
-            words_found += 1
-            word_frequencies[word] = 1
-        else:
-            word_frequencies[word] += 1
->>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
- 
-    return words_found, word_frequencies
+    count = 0 
+    for f in listdir("."):
+        if f.startswith("partial_index_file"):
+            count += 1
+    return count
+            
 
-
-def write_json(name : str, initial_obj):
-    '''Creates or overwites a json file of a specified name with a
-        specific json-serializable object...
+def write_bin(file_name : str, obj):
+    '''Wrapper for writing to file
     '''
-    with open(name + ".json", 'w') as json_file:
-        json.dump(initial_obj, json_file)
+    with open(file_name, "wb") as f:
+        pickle.dump(obj, f)
 
-def load_json(name : str) -> dict:
-    '''Gets a JSON object from a file
+def load_bin(file_name : str):
+    '''Wrapper for loading a file
     '''
-    mapping = {}
-    with open(name + ".json", "r") as json_file:
-        mapping = json.load(json_file)
-    return mapping
+    obj = None
+    with open(file_name, "rb") as f:
+        obj = pickle.load(f, encoding="UTF-8")
+    return obj
 
-def append_json(name : str, initial_obj):
-    '''Creates or appends to a json file of a specified name with a
-        specific json-serializable object...
+def write_file(file_name : str, text : str):
+    '''Wrapper for writing to file
     '''
-    with open(name + ".json", 'a') as json_file:
-        json.dump(initial_obj, json_file)
+    with open(file_name, "w") as f:
+        # pickle.dump(obj, f)
+        f.write(text)
 
-def merge_index(name1: str, name2: str) -> {str : [{str : int, str: int}]}:
-    '''Takes the keys in name2 that are also in key one and adds the values
-        to the corresponding keys in key2
-
-        For example {"apple" : [{'a' : 2}]}, {"apple" : [{'b' : 2}]}
-        {"apple" : [{'a': 2}, {'b' : 2}]}i
+def load_file(file_name : str):
+    '''Wrapper for loading a file
     '''
-    index1 = load_json(name1)
-    index2 = load_json(name2)
-    
-    keys_to_purge = set()
+    obj = None
+    with open(file_name, "r") as f:
+        obj = pickle.load(f, encoding="UTF-8")
+    return obj
 
-    for token in index2.copy():
-        if token in index1:
-            index1[token] += index2[token]
-            keys_to_purge.add(token)
-
-    for key in keys_to_purge:
-        del index2[key]
-
-    write_json(name1, index1)
-    write_json(name2, index2)
-
-def merge_indices(root_name: str, batches : int):
-    '''
-    '''
-    pass
-    # for i in range(batches - 1):
-    #    for j in range(i + 1, batches):
-    #        merge_index(root_nane + str(i), )
+def remove_file(file_path: str):
+    try:
+        remove(file_path)
+    except FileNotFoundError:
+        print("File at {} not found.".format(file_path))
 
 
+# not sure if we need but they might come in handy
+def load_posting(filename : str, token : str):
+    ''' loads posting of given token '''
+    result = list()
+    with open(filename, "r") as f:
+        pos = index_index[token]
+        f.seek(pos)
+        line = f.readline()
+        result = eval(line)
+    return result
 
-if __name__ == "__main__":
-    print(get_words(page_text("DEV/aiclub_ics_uci_edu/8ef6d99d9f9264fc84514cdd2e680d35843785310331e1db4bbd06dd2b8eda9b.json")))
+# given a query, see if we have it on the dictionary structure
+def contains_query(query : str, word_dict : dict) -> bool :
+    query = query.lower()
+    lst_words = query.split("and")
+    for word in lst_words:
+        if word not in word_dict: 
+            return False
+    return True
+
+def defrag_url(url_string : str) -> str:
+    return urldefrag(url_string).url
+
+

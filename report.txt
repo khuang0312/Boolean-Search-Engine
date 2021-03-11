@@ -1,9 +1,0 @@
-Kevin Huang, 45279539
-Klim Rayskiy, 5368211
-Cedric Lim, 24026891
-Camille Padua, 42962688
-Documents parsed: 55393
-Unique tokens: 1104720
-Size of index: 193055100 B
-Size of index: 193055.1 KB
-Size of index: 193.0551 MB

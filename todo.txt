@@ -1,15 +1,14 @@
-Factor in headers (h1, h2, h3) and boldness (b, strong) for importance
-<<<<<<< HEAD
-=======
-Stemming
-Split index among different files... #DONE
-Use NLTK to tokenize
->>>>>>> c28d0a9bb7df579c3d2725bd5fea42d0906fe7f7
+1. Partial indexing / merging
+      Partial indexing complete...
+      Merging in progress
+2. TF-IDF score
+3. Index for the index
+4. Profiling (to check that our code < 300ms)
 
-
-Report
-a table with assorted numbers pertaining to index
-containing at least 
--number of documents
--number of unique tokens
--total size of index on disk
+Extra credit
+Detecting and eliminate duplicate pages (Simhash)
+Add HITS and page ranking
+2-gram, 3-gram index
+Positional indexing
+Index anchor words
+Web or GUI
