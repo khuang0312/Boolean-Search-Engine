@@ -95,9 +95,9 @@ def process_query(query : [str]) -> [(int, int)]:
     for token in QUERY_POSTINGS:
         if len(result) == 0:
             # result.extend(get_postings)
-            result.extend(get_postings(token))
+            result = get_postings(token)
         else:
-            result.extend(intersect(result, get_postings(token)))
+            result = intersect(result, get_postings(token))
 
     # sort result by tf idf in descending order
     result = sorted(result, key = lambda posting: posting[1]+posting[2], reverse = True)
