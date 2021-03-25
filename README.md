@@ -1,4 +1,4 @@
-# CS 121 - Search Engine (M3)
+# Boolean Search Engine
 Given search terms, this search engine retrieve documents containing the terms from a folder of documents.
 
 For example, typing the word "acm" will give pages containing the word "acm".
